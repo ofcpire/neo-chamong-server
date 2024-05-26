@@ -5,6 +5,7 @@ import connectDB from './lib/dbBase/connectDB';
 async function bootstrap() {
   await connectDB();
   const app = await NestFactory.create(AppModule);
+  app.enableCors();
   await app.listen(15941);
 }
 bootstrap();

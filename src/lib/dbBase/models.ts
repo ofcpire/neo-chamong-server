@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { CampingListSchema } from './schema';
 
-export const campingModel = mongoose.model(
+export const campingListModel = mongoose.model(
   'camping',
   CampingListSchema,
   'campings',

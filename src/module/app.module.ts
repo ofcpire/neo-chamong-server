@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppService } from '../service/app.service';
 import { ConfigModule } from '@nestjs/config';
 import { CampingModule } from './camping.module';
-import { AuthModule } from './auth.module';
+import { MembersModule } from './members.module';
 
 @Module({
   imports: [
@@ -10,7 +10,7 @@ import { AuthModule } from './auth.module';
       envFilePath: ['.env', '.env.local'],
       isGlobal: true,
     }),
-    AuthModule,
+    MembersModule,
     CampingModule,
   ],
   providers: [AppService],

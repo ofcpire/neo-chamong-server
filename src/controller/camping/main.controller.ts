@@ -1,10 +1,8 @@
 import { Controller, Get, Query, Param, Logger } from '@nestjs/common';
-import { AppService } from '../../app.service';
-import { campingListModel } from 'src/lib/dbBase/models';
+import { campingListModel } from 'src/lib/dbBase/model/campingModel';
 
 @Controller('main')
 export class MainController {
-  constructor(private readonly appService: AppService) {}
   private readonly logger = new Logger(MainController.name);
   @Get('/')
   async getCampingList(

@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { Response as Res } from 'express';
 import { JwtService } from '@nestjs/jwt';
-import { AuthService } from 'src/service/auth/auth.service';
+import { AuthService } from 'src/service/members/auth.service';
 
 interface LoginBodyType {
   nickname: string;
@@ -51,13 +51,12 @@ export class AuthController {
     @Headers('refresh') refresh,
     @Response() res: Res,
   ) {
-    this.logger.log({ authorization, refresh });
     try {
       const authTokenPayload = await this.authService.verifyToken(
         authorization,
         'authorization',
       );
-      const memberInfo = await this.authService.getMemberInfoByToken(
+      const memberInfo = await this.authService.getMemberInfoByEmail(
         authTokenPayload.email,
       );
       res.send(memberInfo);
@@ -70,7 +69,7 @@ export class AuthController {
         const newAccessToken = await this.authService.accessTokenSign(
           refreshTokenPayload.email,
         );
-        const memberInfo = await this.authService.getMemberInfoByToken(
+        const memberInfo = await this.authService.getMemberInfoByEmail(
           refreshTokenPayload.email,
         );
         res.setHeader('authorization', newAccessToken).send(memberInfo);
@@ -94,5 +93,10 @@ export class AuthController {
     else {
       throw new Error('가입 오류');
     }
+  }
+
+  @Get('/logout')
+  async logout(@Headers('authorization') authorization, @Response() res: Res) {
+    res.status(200).send();
   }
 }

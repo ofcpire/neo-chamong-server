@@ -1,15 +1,6 @@
 import mongoose from 'mongoose';
 
 export const CampingListSchema = new mongoose.Schema({
-  reviews: [
-    {
-      createdAt: Date,
-      updatedAt: Date,
-      reviewId: Number,
-      content: String,
-      rating: Number,
-    },
-  ],
   totalRating: Number,
   contentId: Number,
   facltNm: String,
@@ -38,4 +29,13 @@ export const CampingListSchema = new mongoose.Schema({
   exprnProgrm: String,
   posblFcltyCl: String,
   lctCl: String,
+});
+
+export const CampingReviewSchema = new mongoose.Schema({
+  author: String,
+  createdAt: Date,
+  updatedAt: Date,
+  reviewId: Number,
+  content: String,
+  rating: Number,
 });

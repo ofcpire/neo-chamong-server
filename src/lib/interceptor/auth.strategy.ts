@@ -12,9 +12,9 @@ export class AuthStrategy extends PassportStrategy(Strategy) {
   ) {
     super({
       jwtFromRequest: (req) => {
-        let token = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
+        let token = ExtractJwt.fromHeader('authorization')(req);
         if (!token && req.headers.refresh) {
-          token = req.headers.refresh;
+          token = ExtractJwt.fromHeader('refresh')(req);
         }
         return token;
       },

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { hashSync, genSaltSync, compareSync } from 'bcryptjs';
 import { ConfigService } from '@nestjs/config';
 import { memberModel } from 'src/lib/dbBase/model/memberModel';
@@ -26,7 +26,7 @@ export class AuthService {
     } else return false;
   }
 
-  async getMemberInfoByToken(email: string) {
+  async getMemberInfoByEmail(email: string) {
     const memberInfo = await memberModel.findOne({
       email: email,
     });

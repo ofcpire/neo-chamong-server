@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-export const CampingListSchema = new mongoose.Schema({
+export const CampListSchema = new mongoose.Schema({
   totalRating: Number,
   contentId: Number,
   facltNm: String,
@@ -31,11 +31,16 @@ export const CampingListSchema = new mongoose.Schema({
   lctCl: String,
 });
 
-export const CampingReviewSchema = new mongoose.Schema({
+export const CampReviewSchema = new mongoose.Schema({
   author: String,
   createdAt: Date,
   updatedAt: Date,
   reviewId: Number,
   content: String,
   rating: Number,
+});
+
+export const CampKeywordSchema = new mongoose.Schema({
+  keywordId: Number,
+  keyword: [String],
 });

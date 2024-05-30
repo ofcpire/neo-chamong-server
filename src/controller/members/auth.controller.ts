@@ -80,7 +80,7 @@ export class AuthController {
   }
 
   @Post('')
-  async createAccount(@Body() body: LoginBodyType) {
+  async createAccount(@Body() body: LoginBodyType, @Response() res: Res) {
     const encryptedPassword = await this.authService.passwordEncrypt(
       body.password,
     );
@@ -89,10 +89,7 @@ export class AuthController {
       body.email,
       encryptedPassword,
     );
-    if (result) return;
-    else {
-      throw new Error('가입 오류');
-    }
+    res.status(201).send(result.email);
   }
 
   @Get('/logout')

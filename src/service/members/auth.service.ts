@@ -3,6 +3,7 @@ import { hashSync, genSaltSync, compareSync } from 'bcryptjs';
 import { ConfigService } from '@nestjs/config';
 import { memberModel } from 'src/lib/dbBase/model/memberModel';
 import { JwtService } from '@nestjs/jwt';
+import { ConflictException } from '@nestjs/common';
 
 @Injectable()
 export class AuthService {
@@ -63,7 +64,7 @@ export class AuthService {
           console.log('Error : ' + err);
         });
       return memberObj;
-    } else return false;
+    } else throw new ConflictException();
   }
 
   async refreshTokenSign(email: string) {

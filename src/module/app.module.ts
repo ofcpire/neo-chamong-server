@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppService } from '../service/app.service';
 import { ConfigModule } from '@nestjs/config';
-import { CampingModule } from './camping.module';
+import { CampModule } from './camp.module';
 import { MembersModule } from './members.module';
 
 @Module({
@@ -11,7 +11,7 @@ import { MembersModule } from './members.module';
       isGlobal: true,
     }),
     MembersModule,
-    CampingModule,
+    CampModule,
   ],
   providers: [AppService],
 })

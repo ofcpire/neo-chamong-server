@@ -10,6 +10,7 @@ import {
 import { Response as Res } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from 'src/service/members/auth.service';
+import { MemberInfoService } from 'src/service/members/member-info.service';
 
 interface LoginBodyType {
   nickname: string;
@@ -22,26 +23,31 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly jwtService: JwtService,
+    private readonly memberInfoService: MemberInfoService,
   ) {}
   private readonly logger = new Logger(AuthController.name);
 
   @Post('/login')
   async login(@Body() body: LoginBodyType, @Response() res: Res) {
     this.logger.log(`members/login`);
-    const member = await this.authService.memberLogin(
+    const memberInfo = await this.authService.memberLogin(
       body.email,
       body.password,
     );
-    if (!member) {
+    if (!memberInfo) {
       res.status(404).send('unknown email');
     } else {
+      console.log(memberInfo);
+      const accessToken = await this.authService.accessTokenSign(
+        memberInfo.email,
+      );
+      res.setHeader('authorization', accessToken);
+
       const refreshToken = await this.authService.refreshTokenSign(
-        member.email,
+        memberInfo.email,
       );
       res.setHeader('refresh', refreshToken);
-      const accessToken = await this.authService.accessTokenSign(member.email);
-      res.setHeader('authorization', accessToken);
-      res.status(200).send(member);
+      res.status(200).send(memberInfo);
     }
   }
 
@@ -56,7 +62,7 @@ export class AuthController {
         authorization,
         'authorization',
       );
-      const memberInfo = await this.authService.getMemberInfoByEmail(
+      const memberInfo = await this.memberInfoService.getMemberInfoByEmail(
         authTokenPayload.email,
       );
       res.send(memberInfo);
@@ -69,7 +75,7 @@ export class AuthController {
         const newAccessToken = await this.authService.accessTokenSign(
           refreshTokenPayload.email,
         );
-        const memberInfo = await this.authService.getMemberInfoByEmail(
+        const memberInfo = await this.memberInfoService.getMemberInfoByEmail(
           refreshTokenPayload.email,
         );
         res.setHeader('authorization', newAccessToken).send(memberInfo);

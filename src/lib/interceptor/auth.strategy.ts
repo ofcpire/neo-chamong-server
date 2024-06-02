@@ -1,13 +1,13 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
-import { AuthService } from 'src/service/members/auth.service';
+import { MemberInfoService } from 'src/service/members/member-info.service';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthStrategy extends PassportStrategy(Strategy) {
   constructor(
-    private readonly authService: AuthService,
+    private readonly memberInfoService: MemberInfoService,
     private configService: ConfigService,
   ) {
     super({
@@ -23,7 +23,9 @@ export class AuthStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: { email: string }) {
-    const member = await this.authService.getMemberInfoByEmail(payload.email);
+    const member = await this.memberInfoService.getMemberInfoByEmail(
+      payload.email,
+    );
     if (!member) {
       throw new UnauthorizedException();
     }

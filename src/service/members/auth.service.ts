@@ -1,9 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
 import { hashSync, genSaltSync, compareSync } from 'bcryptjs';
 import { ConfigService } from '@nestjs/config';
 import { memberModel } from 'src/lib/dbBase/model/memberModel';
 import { JwtService } from '@nestjs/jwt';
-import { ConflictException } from '@nestjs/common';
 
 @Injectable()
 export class AuthService {
@@ -21,18 +24,11 @@ export class AuthService {
     const memberInfo = await memberModel.findOne({
       email: email,
     });
+    console.log(memberInfo);
     if (compareSync(password, memberInfo.password)) {
       memberInfo.password = undefined;
       return memberInfo;
     } else return false;
-  }
-
-  async getMemberInfoByEmail(email: string) {
-    const memberInfo = await memberModel.findOne({
-      email: email,
-    });
-    memberInfo.password = undefined;
-    return memberInfo;
   }
 
   async createAccount(
@@ -40,6 +36,9 @@ export class AuthService {
     email: string,
     encryptedPassword: string,
   ) {
+    if (!nickname || !email || !this.emailValidator(email)) {
+      throw new BadRequestException();
+    }
     const isMemberExist = await memberModel.findOne({
       email,
     });
@@ -96,5 +95,12 @@ export class AuthService {
     });
     if (result.type !== type) throw new Error('type mismatch');
     return result;
+  }
+
+  async emailValidator(email: string) {
+    const emailRegex = new RegExp(
+      "/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:.[a-zA-Z0-9-]+)*$/",
+    );
+    return emailRegex.test(email);
   }
 }

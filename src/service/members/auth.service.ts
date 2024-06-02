@@ -15,6 +15,12 @@ export class AuthService {
     private configService: ConfigService,
   ) {}
   async passwordEncrypt(password: string): Promise<string> {
+    if (
+      !password.match(
+        /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]/,
+      )
+    )
+      throw new BadRequestException();
     const saltRounds = 10;
     const salt = genSaltSync(saltRounds);
     return hashSync(password, salt);

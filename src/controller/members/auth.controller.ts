@@ -37,11 +37,9 @@ export class AuthController {
     if (!memberInfo) {
       res.status(404).send('unknown email');
     } else {
-      const accessToken = await this.authService.accessTokenSign(
-        memberInfo.email,
-      );
+      const accessToken = await this.authService.accessTokenSign(memberInfo.id);
       const refreshToken = await this.authService.refreshTokenSign(
-        memberInfo.email,
+        memberInfo.id,
       );
       res.setHeader('authorization', accessToken);
       res.setHeader('refresh', refreshToken);
@@ -60,8 +58,8 @@ export class AuthController {
         authorization,
         'authorization',
       );
-      const memberInfo = await this.memberInfoService.getMemberInfoByEmail(
-        authTokenPayload.email,
+      const memberInfo = await this.memberInfoService.getMemberInfoById(
+        authTokenPayload.id,
       );
       res.send(memberInfo);
     } catch (authErr) {
@@ -71,10 +69,10 @@ export class AuthController {
           'refresh',
         );
         const newAccessToken = await this.authService.accessTokenSign(
-          refreshTokenPayload.email,
+          refreshTokenPayload.id,
         );
-        const memberInfo = await this.memberInfoService.getMemberInfoByEmail(
-          refreshTokenPayload.email,
+        const memberInfo = await this.memberInfoService.getMemberInfoById(
+          refreshTokenPayload.id,
         );
         res.setHeader('authorization', newAccessToken).send(memberInfo);
       } catch (refreshErr) {

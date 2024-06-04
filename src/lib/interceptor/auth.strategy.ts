@@ -22,10 +22,8 @@ export class AuthStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: { email: string }) {
-    const member = await this.memberInfoService.getMemberInfoByEmail(
-      payload.email,
-    );
+  async validate(payload: { id: string }) {
+    const member = await this.memberInfoService.getMemberInfoById(payload.id);
     if (!member) {
       throw new UnauthorizedException();
     }

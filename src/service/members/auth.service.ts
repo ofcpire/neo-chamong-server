@@ -10,6 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Member } from 'src/lib/dbBase/schema/memberSchema';
 import { Model } from 'mongoose';
+import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class AuthService {
@@ -53,6 +54,7 @@ export class AuthService {
     });
     if (!isMemberExist) {
       const memberClass = new this.memberModel({
+        id: uuid(),
         email,
         nickname,
         password: encryptedPassword,
@@ -68,23 +70,23 @@ export class AuthService {
     } else throw new ConflictException();
   }
 
-  async refreshTokenSign(email: string) {
-    const payload = { email, type: 'refresh' };
+  async refreshTokenSign(id: string) {
+    const payload = { id, type: 'refresh' };
     const token = this.jwtService.signAsync(payload, {
       secret: this.configService.get('AUTH_SECRET'),
       issuer: 'chamong',
-      audience: email,
+      audience: id,
       expiresIn: '3d',
     });
     return token;
   }
 
-  async accessTokenSign(email: string) {
-    const payload = { email, type: 'authorization' };
+  async accessTokenSign(id: string) {
+    const payload = { id, type: 'authorization' };
     const token = this.jwtService.signAsync(payload, {
       secret: this.configService.get('AUTH_SECRET'),
       issuer: 'chamong',
-      audience: email,
+      audience: id,
       expiresIn: '1h',
     });
     return token;

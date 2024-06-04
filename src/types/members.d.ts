@@ -1,7 +1,7 @@
 import { Request } from 'express';
 
 export interface MemberInfoType {
-  id: number;
+  id: string;
   email: string;
   nickname: string;
   password: string;

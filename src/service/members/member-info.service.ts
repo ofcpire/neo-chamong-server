@@ -12,9 +12,9 @@ export class MemberInfoService {
     private jwtService: JwtService,
     private configService: ConfigService,
   ) {}
-  async getMemberInfoByEmail(email: string) {
+  async getMemberInfoById(id: string) {
     const memberInfo = await this.memberModel.findOne({
-      email: email,
+      id,
     });
     memberInfo.password = undefined;
     return memberInfo;

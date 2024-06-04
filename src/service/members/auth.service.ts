@@ -2,15 +2,19 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  Logger,
 } from '@nestjs/common';
 import { hashSync, genSaltSync, compareSync } from 'bcryptjs';
 import { ConfigService } from '@nestjs/config';
-import { memberModel } from 'src/lib/dbBase/model/memberModel';
 import { JwtService } from '@nestjs/jwt';
+import { InjectModel } from '@nestjs/mongoose';
+import { Member } from 'src/lib/dbBase/schema/memberSchema';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class AuthService {
   constructor(
+    @InjectModel(Member.name) private memberModel: Model<Member>,
     private jwtService: JwtService,
     private configService: ConfigService,
   ) {}
@@ -27,10 +31,9 @@ export class AuthService {
   }
 
   async memberLogin(email: string, password: string) {
-    const memberInfo = await memberModel.findOne({
+    const memberInfo = await this.memberModel.findOne({
       email: email,
     });
-    console.log(memberInfo);
     if (compareSync(password, memberInfo.password)) {
       memberInfo.password = undefined;
       return memberInfo;
@@ -45,11 +48,11 @@ export class AuthService {
     if (!nickname || !email || !this.emailValidator(email)) {
       throw new BadRequestException();
     }
-    const isMemberExist = await memberModel.findOne({
+    const isMemberExist = await this.memberModel.findOne({
       email,
     });
     if (!isMemberExist) {
-      const memberObj = {
+      const memberClass = new this.memberModel({
         email,
         nickname,
         password: encryptedPassword,
@@ -57,18 +60,11 @@ export class AuthService {
         about: '자기소개를 입력해주세요.',
         car_name: '',
         oil_info: null,
-      };
-
-      const memberClass = new memberModel(memberObj);
-      memberClass
-        .save()
-        .then(() => {
-          console.log(memberClass);
-        })
-        .catch((err) => {
-          console.log('Error : ' + err);
-        });
-      return memberObj;
+      });
+      memberClass.save().catch((err) => {
+        Logger.log('Error : ' + err);
+      });
+      return memberClass.email;
     } else throw new ConflictException();
   }
 
@@ -89,7 +85,7 @@ export class AuthService {
       secret: this.configService.get('AUTH_SECRET'),
       issuer: 'chamong',
       audience: email,
-      expiresIn: '15m',
+      expiresIn: '1h',
     });
     return token;
   }

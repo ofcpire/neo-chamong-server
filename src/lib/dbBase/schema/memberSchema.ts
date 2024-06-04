@@ -1,12 +1,28 @@
-import mongoose from 'mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
 
-export const MemberSchema = new mongoose.Schema({
-  _id: Number,
-  email: String,
-  nickname: String,
-  password: String,
-  profileImg: String,
-  about: String,
-  car_name: String,
-  oil_info: String,
-});
+@Schema()
+export class Member extends Document {
+  @Prop({ required: true })
+  email: string;
+
+  @Prop({ required: true })
+  nickname: string;
+
+  @Prop({ required: true })
+  password: string;
+
+  @Prop()
+  profileImg: string;
+
+  @Prop()
+  about: string;
+
+  @Prop()
+  car_name: string;
+
+  @Prop()
+  oil_info: string;
+}
+
+export const MemberSchema = SchemaFactory.createForClass(Member);

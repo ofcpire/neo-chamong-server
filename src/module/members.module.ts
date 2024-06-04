@@ -5,9 +5,12 @@ import { AuthService } from 'src/service/members/auth.service';
 import { MypageController } from 'src/controller/members/mypage.controller';
 import { AuthStrategy } from 'src/lib/interceptor/auth.strategy';
 import { MemberInfoService } from 'src/service/members/member-info.service';
+import { MongooseModule } from '@nestjs/mongoose';
+import { Member, MemberSchema } from 'src/lib/dbBase/schema/memberSchema';
 
 @Module({
   imports: [
+    MongooseModule.forFeature([{ name: Member.name, schema: MemberSchema }]),
     JwtModule.register({
       signOptions: { expiresIn: '180s' },
     }),

@@ -37,15 +37,13 @@ export class AuthController {
     if (!memberInfo) {
       res.status(404).send('unknown email');
     } else {
-      console.log(memberInfo);
       const accessToken = await this.authService.accessTokenSign(
         memberInfo.email,
       );
-      res.setHeader('authorization', accessToken);
-
       const refreshToken = await this.authService.refreshTokenSign(
         memberInfo.email,
       );
+      res.setHeader('authorization', accessToken);
       res.setHeader('refresh', refreshToken);
       res.status(200).send(memberInfo);
     }
@@ -95,7 +93,7 @@ export class AuthController {
       body.email,
       encryptedPassword,
     );
-    res.status(201).send(result.email);
+    res.status(201).send(result);
   }
 
   @Get('/logout')

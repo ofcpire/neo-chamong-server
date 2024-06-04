@@ -8,7 +8,7 @@ const corsOption: CorsOptions = {
 };
 
 async function bootstrap() {
-  await connectDB();
+  // await connectDB();
   const app = await NestFactory.create(AppModule);
   app.enableCors(corsOption);
   await app.listen(15941);

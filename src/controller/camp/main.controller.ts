@@ -1,12 +1,21 @@
-import { Controller, Get, Query, Param, Logger } from '@nestjs/common';
-import { campListModel } from 'src/lib/dbBase/model/campModel';
+import {
+  Controller,
+  Get,
+  Query,
+  Param,
+  Logger,
+  UseInterceptors,
+} from '@nestjs/common';
 import { MainService } from 'src/service/camp/main.service';
+import { WrapContentInterceptor } from 'src/lib/interceptor/wrap-content.interceptor';
 
 @Controller('main')
 export class MainController {
   constructor(private readonly mainService: MainService) {}
   private readonly logger = new Logger(MainController.name);
+
   @Get('/')
+  @UseInterceptors(WrapContentInterceptor)
   async getCampList(
     @Query('page') page: number = 1,
     @Query('row') row: number = 30,
@@ -16,16 +25,10 @@ export class MainController {
     return data;
   }
   @Get('/:contentId')
-  async getCamp(@Param('contentId') contentId: string) {
+  async getCamp(@Param('contentId') contentId: number) {
     this.logger.log(`/main/${contentId}`);
-    try {
-      const campData = await campListModel.findOne({
-        contentId: contentId,
-      });
-      return campData;
-    } catch (err) {
-      this.logger.error(err);
-    }
+    const data = await this.mainService.getCampByContentId(contentId);
+    return data;
   }
 
   @Get('/search/keyword/:keywordId')

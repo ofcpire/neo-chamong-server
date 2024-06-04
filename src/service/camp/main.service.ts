@@ -1,25 +1,29 @@
 import { BadGatewayException, Injectable, Logger } from '@nestjs/common';
-import {
-  campListModel,
-  campKeywordModel,
-} from 'src/lib/dbBase/model/campModel';
+import { InjectModel } from '@nestjs/mongoose';
+import { CampKeyword, CampList } from 'src/lib/dbBase/schema/campSchema';
 import { searchfields, areas, themes } from 'src/lib/variables/campVariables';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class MainService {
-  constructor() {}
+  constructor(
+    @InjectModel(CampList.name) private campListModel: Model<CampList>,
+    @InjectModel(CampKeyword.name) private campKeywordModel: Model<CampKeyword>,
+  ) {}
   private readonly logger = new Logger(MainService.name);
   async getCampByPage(page: number = 1, row: number = 30) {
     const skip = (page - 1) * row;
-    const campData = await campListModel.find({}).skip(skip).limit(row);
-    const data = {
-      content: campData,
-    };
-    return data;
+    const campData = await this.campListModel.find({}).skip(skip).limit(row);
+    return campData;
+  }
+
+  async getCampByContentId(contentId: number) {
+    const campData = await this.campListModel.findOne({ contentId });
+    return campData;
   }
 
   async getCampByKeywordId(keywordId: number = 1, page: number, row: number) {
-    const keywords = await campKeywordModel.findOne({
+    const keywords = await this.campKeywordModel.findOne({
       keywordId: keywordId,
     });
     if (!keywords) return [];
@@ -62,7 +66,7 @@ export class MainService {
         queryOption['$and'] = [areaQuery];
       }
 
-      const campData = await campListModel
+      const campData = await this.campListModel
         .find(queryOption)
         .skip(skip)
         .limit(row);

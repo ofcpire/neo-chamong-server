@@ -23,8 +23,6 @@ export class MypageController {
 
   @Get('/mypage')
   async login(@Response() res: Res, @Request() req: InterceptedRequest) {
-    const token = req.header('authorization');
-    this.logger.log(token);
     this.logger.log('members/mypage');
     const memberInfo = req.user;
     const data = {

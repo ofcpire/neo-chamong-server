@@ -60,8 +60,8 @@ export class AuthService {
         password: encryptedPassword,
         profileImg: null,
         about: '자기소개를 입력해주세요.',
-        car_name: '',
-        oil_info: null,
+        carName: '',
+        oilInfo: null,
       });
       memberClass.save().catch((err) => {
         Logger.log('Error : ' + err);

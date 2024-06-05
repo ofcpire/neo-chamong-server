@@ -22,10 +22,10 @@ export class Member extends Document {
   about: string;
 
   @Prop()
-  car_name: string;
+  carName: string;
 
   @Prop()
-  oil_info: string;
+  oilInfo: string;
 }
 
 export const MemberSchema = SchemaFactory.createForClass(Member);

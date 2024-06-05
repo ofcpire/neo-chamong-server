@@ -7,8 +7,8 @@ export interface MemberInfoType {
   password: string;
   profileImg: string;
   about: string;
-  car_name: string;
-  oil_info: string;
+  carName: string;
+  oilInfo: string;
 }
 
 export interface InterceptedRequest extends Request {

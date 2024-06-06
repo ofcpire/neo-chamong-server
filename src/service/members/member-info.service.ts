@@ -19,4 +19,16 @@ export class MemberInfoService {
     memberInfo.password = undefined;
     return memberInfo;
   }
+
+  async getMemberInfoForArticleById(id: string) {
+    const memberInfo = (await this.getMemberInfoById(id)).toObject();
+    return {
+      nickname: memberInfo.nickname,
+      profileImg: memberInfo.profileImg,
+      carName: memberInfo.carName,
+      about: memberInfo.about,
+      oilInfo: memberInfo.oilInfo,
+      memberId: memberInfo.id,
+    };
+  }
 }

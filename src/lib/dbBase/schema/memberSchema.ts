@@ -9,7 +9,7 @@ export class Member extends Document {
   @Prop({ required: true })
   email: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, default: '차몽인' })
   nickname: string;
 
   @Prop({ required: true })
@@ -18,13 +18,13 @@ export class Member extends Document {
   @Prop()
   profileImg: string;
 
-  @Prop()
+  @Prop({ default: '자기 소개를 입력해주세요.' })
   about: string;
 
-  @Prop()
+  @Prop({ default: '정보 없음' })
   carName: string;
 
-  @Prop()
+  @Prop({ default: '정보 없음' })
   oilInfo: string;
 }
 

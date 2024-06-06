@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { CampModule } from './camp.module';
 import { MembersModule } from './members.module';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ArticlesModule } from './articles.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { MongooseModule } from '@nestjs/mongoose';
     }),
     MembersModule,
     CampModule,
+    ArticlesModule,
     MongooseModule.forRoot(process.env.MONGODB_URL),
   ],
   providers: [AppService],

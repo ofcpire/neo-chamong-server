@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { hashSync, genSaltSync, compareSync } from 'bcryptjs';
 import { ConfigService } from '@nestjs/config';
@@ -35,6 +36,7 @@ export class AuthService {
     const memberInfo = await this.memberModel.findOne({
       email: email,
     });
+    if (!memberInfo) throw new NotFoundException();
     if (compareSync(password, memberInfo.password)) {
       memberInfo.password = undefined;
       return memberInfo;

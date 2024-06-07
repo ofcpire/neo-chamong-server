@@ -3,10 +3,10 @@ import { Document } from 'mongoose';
 
 @Schema({ collection: 'camps' })
 export class CampList extends Document {
-  @Prop()
+  @Prop({ default: 0 })
   totalRating: number;
 
-  @Prop()
+  @Prop({ required: true })
   contentId: number;
 
   @Prop()

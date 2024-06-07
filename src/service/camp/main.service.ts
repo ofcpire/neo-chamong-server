@@ -3,12 +3,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { CampKeyword, CampList } from 'src/lib/dbBase/schema/campSchema';
 import { searchfields, areas, themes } from 'src/lib/variables/campVariables';
 import { Model } from 'mongoose';
+import { ReviewService } from './review.service';
 
 @Injectable()
 export class MainService {
   constructor(
     @InjectModel(CampList.name) private campListModel: Model<CampList>,
     @InjectModel(CampKeyword.name) private campKeywordModel: Model<CampKeyword>,
+    private readonly reviewService: ReviewService,
   ) {}
   private readonly logger = new Logger(MainService.name);
   async getCampByPage(page: number = 1, row: number = 30) {
@@ -18,8 +20,13 @@ export class MainService {
   }
 
   async getCampByContentId(contentId: number) {
-    const campData = await this.campListModel.findOne({ contentId });
-    return campData;
+    const campData = await this.campListModel.findOne({ contentId }).lean();
+    const reviews =
+      await this.reviewService.getReviewsForContentByContentId(contentId);
+    return {
+      ...campData,
+      reviews,
+    };
   }
 
   async getCampByKeywordId(keywordId: number = 1, page: number, row: number) {

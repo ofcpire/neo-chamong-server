@@ -1,10 +1,11 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import { v4 as uuid } from 'uuid';
 
 @Schema()
 export class Article extends Document {
-  @Prop({ required: true })
-  id: number;
+  @Prop({ required: true, default: uuid })
+  id: string;
 
   @Prop({ required: true })
   title: string;
@@ -41,11 +42,11 @@ export const ArticleSchema = SchemaFactory.createForClass(Article);
 
 @Schema()
 export class ArticleComment extends Document {
-  @Prop({ required: true })
-  id: number;
+  @Prop({ required: true, default: uuid })
+  id: string;
 
   @Prop({ required: true })
-  articleId: number;
+  articleId: string;
 
   @Prop({ required: true })
   content: string;
@@ -71,7 +72,7 @@ export class ArticleLike extends Document {
   @Prop({ required: true })
   memberId: string;
   @Prop({ required: true })
-  articleId: number;
+  articleId: string;
 }
 
 export const ArticleLikeSchema = SchemaFactory.createForClass(ArticleLike);

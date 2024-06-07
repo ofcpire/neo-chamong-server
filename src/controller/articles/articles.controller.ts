@@ -51,7 +51,7 @@ export class ArticlesController {
   @Get('/:articleId')
   @UseGuards(OptionalAuthGuard)
   async getArticleByArticleId(
-    @Param('articleId') articleId: number,
+    @Param('articleId') articleId: string,
     @Request() req: InterceptedRequest,
   ) {
     const memberInfo = req.user ? req.user.id : null;
@@ -73,37 +73,37 @@ export class ArticlesController {
     res.status(201).send({ id });
   }
 
-  @Patch('/:articlesId')
+  @Patch('/:articleId')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(AnyFilesInterceptor())
   async patchArticles(
-    @Param('articlesId') articlesId: number,
+    @Param('articleId') articleId: string,
     @Request() req: InterceptedRequest,
     @Response() res: Res,
   ) {
     await this.articlesService.patchArticle(
       await this.articlesService.extractArticleBody(req.files, 'articleUpdate'),
       req.user.id,
-      articlesId,
+      articleId,
     );
     res.status(200).send();
   }
 
-  @Delete('/:articlesId')
+  @Delete('/:articleId')
   @UseGuards(JwtAuthGuard)
   async deleteArticles(
-    @Param('articlesId') articlesId: number,
+    @Param('articleId') articleId: string,
     @Request() req: InterceptedRequest,
     @Response() res: Res,
   ) {
-    await this.articlesService.deleteArticles(req.user?.id, articlesId);
-    res.status(204).send(`delete /articles/${articlesId}`);
+    await this.articlesService.deleteArticles(req.user?.id, articleId);
+    res.status(204).send(`delete /articles/${articleId}`);
   }
 
   @Post('/:articleId/like')
   @UseGuards(JwtAuthGuard)
   async likeArticles(
-    @Param('articleId') articleId: number,
+    @Param('articleId') articleId: string,
     @Request() req: InterceptedRequest,
     @Response() res: Res,
   ) {
@@ -114,7 +114,7 @@ export class ArticlesController {
   @Delete('/:articleId/like')
   @UseGuards(JwtAuthGuard)
   async dislikeArticles(
-    @Param('articleId') articleId: number,
+    @Param('articleId') articleId: string,
     @Request() req: InterceptedRequest,
     @Response() res: Res,
   ) {
@@ -125,7 +125,7 @@ export class ArticlesController {
   @Post('/:articleId/comments')
   @UseGuards(JwtAuthGuard)
   async postArticleComment(
-    @Param('articleId') articleId: number,
+    @Param('articleId') articleId: string,
     @Request() req: InterceptedRequest,
     @Response() res: Res,
     @Body() body: CreateArticleCommentDto,

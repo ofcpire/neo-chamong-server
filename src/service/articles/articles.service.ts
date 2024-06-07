@@ -5,6 +5,7 @@ import {
   Logger,
   ConflictException,
   NotFoundException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -31,21 +32,24 @@ export class ArticlesService {
       .find({
         public: { $ne: false },
       })
+      .sort({ createdAt: 1 })
       .skip(skip)
       .limit(row);
     return articleData.reverse();
   }
 
-  private async getArticleById(articleId: number) {
+  private async getArticleById(articleId: string) {
     const articleData = await this.articleModel.findOne({ id: articleId });
     return articleData;
   }
 
   async getArticleWithDetailsById(
-    articleId: number,
+    articleId: string,
     memberId: string | null = null,
   ) {
     const articleDocument = await this.getArticleById(articleId);
+    articleDocument.viewCnt += 1;
+    articleDocument.save();
     const articleData = articleDocument.toObject();
     const articleLikes = await this.articleLikeModel.find({ articleId }).lean();
     const memberInfo =
@@ -64,7 +68,7 @@ export class ArticlesService {
     };
   }
 
-  private async getCommentsByArticleId(articleId: number) {
+  private async getCommentsByArticleId(articleId: string) {
     const comments = await this.articleCommentModel
       .find({
         articleId,
@@ -72,11 +76,12 @@ export class ArticlesService {
           $ne: false,
         },
       })
+      .sort({ createdAt: 1 })
       .lean();
     return comments;
   }
 
-  private async getCommentsWithMemberInfo(articleId: number) {
+  private async getCommentsWithMemberInfo(articleId: string) {
     const comments = await this.getCommentsByArticleId(articleId);
     const memberIdList = Array.from(new Set(comments.map((e) => e.memberId)));
     const memberInfos = await Promise.all(
@@ -100,14 +105,12 @@ export class ArticlesService {
 
   async postArticle(CreateArticleDto: CreateArticleDto, memberId: string) {
     try {
-      const id = (await this.articleModel.countDocuments()) + 1;
       const createdArticle = new this.articleModel({
         ...CreateArticleDto,
-        id,
         memberId,
       });
       await createdArticle.save();
-      return id;
+      return createdArticle.id;
     } catch (err) {
       throw new BadRequestException();
     }
@@ -116,7 +119,7 @@ export class ArticlesService {
   async patchArticle(
     CreateArticleDto: CreateArticleDto,
     memberId: string,
-    articleId: number,
+    articleId: string,
   ) {
     const existArticle = await this.getArticleById(articleId);
     if (existArticle.memberId !== memberId) throw new UnauthorizedException();
@@ -130,7 +133,7 @@ export class ArticlesService {
     return await this.articleModel.find({}).sort({ likeCnt: -1 }).limit(3);
   }
 
-  async deleteArticles(memberId: string, articleId: number) {
+  async deleteArticles(memberId: string, articleId: string) {
     const articleData = await this.getArticleById(articleId);
     if (memberId === articleData.memberId) {
       articleData.public = false;
@@ -156,28 +159,53 @@ export class ArticlesService {
     }
   }
 
-  async postComment(articleId: number, memberId: string, content: string) {
-    const id = (await this.articleCommentModel.countDocuments()) + 1;
+  async postComment(articleId: string, memberId: string, content: string) {
+    const session = await this.articleCommentModel.db.startSession();
+    session.startTransaction();
     const newArticleComment = new this.articleCommentModel({
-      id,
       articleId,
       memberId,
       content,
     });
-    await newArticleComment.save();
-    return id;
+    try {
+      await this.articleModel.updateOne(
+        { id: articleId },
+        { $inc: { commentCnt: 1 } },
+      );
+      await newArticleComment.save();
+      await session.commitTransaction();
+    } catch (err) {
+      Logger.log(err);
+      await session.abortTransaction();
+      throw new InternalServerErrorException();
+    }
+    session.endSession();
+    return true;
   }
 
   async deleteComment(commentId: number, memberId: string) {
     const comment = await this.articleCommentModel.findOne({ id: commentId });
     if (comment.memberId === memberId) {
       comment.public = false;
-      comment.save();
-      return true;
     } else throw new UnauthorizedException();
+    const session = await this.articleCommentModel.startSession();
+    session.startTransaction();
+    try {
+      await comment.save();
+      await this.articleModel.updateOne(
+        { id: comment.articleId },
+        { $inc: { commentCnt: -1 } },
+      );
+      session.commitTransaction();
+    } catch (err) {
+      Logger.log(err);
+      session.abortTransaction();
+      throw new InternalServerErrorException();
+    }
+    session.endSession();
   }
 
-  async likeArticle(articleId: number, memberId: string) {
+  async likeArticle(articleId: string, memberId: string) {
     if (
       await this.articleLikeModel.findOne({
         articleId,
@@ -185,31 +213,55 @@ export class ArticlesService {
       })
     )
       throw new ConflictException();
+    const session = await this.articleLikeModel.db.startSession();
+    session.startTransaction();
     try {
       const newLikeArticle = new this.articleLikeModel({
         articleId,
         memberId,
       });
       newLikeArticle.save();
-      return true;
+      await this.articleModel.updateOne(
+        { id: articleId },
+        { $inc: { likeCnt: 1 } },
+      );
+      session.commitTransaction();
     } catch (err) {
       Logger.error(err);
+      session.abortTransaction();
       throw new BadRequestException();
     }
+
+    session.endSession();
+    return true;
   }
 
-  async dislikeArticle(articleId: number, memberId: string) {
+  async dislikeArticle(articleId: string, memberId: string) {
     const existLike = await this.articleLikeModel.findOne({
       articleId,
       memberId,
     });
     if (!existLike) {
       throw new NotFoundException();
-    } else {
+    }
+    const session = await this.articleLikeModel.db.startSession();
+    session.startTransaction();
+    try {
       await this.articleLikeModel.deleteOne({
         articleId,
         memberId,
       });
+      await this.articleModel.updateOne(
+        { id: articleId },
+        { $inc: { likeCnt: -1 } },
+      );
+      session.commitTransaction();
+    } catch (err) {
+      Logger.error(err);
+      session.abortTransaction();
+      throw new InternalServerErrorException();
     }
+    session.endSession();
+    return true;
   }
 }

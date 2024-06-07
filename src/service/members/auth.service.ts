@@ -11,7 +11,6 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Member } from 'src/lib/dbBase/schema/memberSchema';
 import { Model } from 'mongoose';
-import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class AuthService {
@@ -56,7 +55,6 @@ export class AuthService {
     });
     if (!isMemberExist) {
       const memberClass = new this.memberModel({
-        id: uuid(),
         email,
         nickname,
         password: encryptedPassword,

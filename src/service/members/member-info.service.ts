@@ -13,15 +13,17 @@ export class MemberInfoService {
     private configService: ConfigService,
   ) {}
   async getMemberInfoById(id: string) {
-    const memberInfo = await this.memberModel.findOne({
-      id,
-    });
+    const memberInfo = await this.memberModel
+      .findOne({
+        id,
+      })
+      .lean();
     memberInfo.password = undefined;
     return memberInfo;
   }
 
   async getMemberInfoForArticleById(id: string) {
-    const memberInfo = (await this.getMemberInfoById(id)).toObject();
+    const memberInfo = await this.getMemberInfoById(id);
     return {
       nickname: memberInfo.nickname,
       profileImg: memberInfo.profileImg,

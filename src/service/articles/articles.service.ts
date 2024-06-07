@@ -174,13 +174,14 @@ export class ArticlesService {
       );
       await newArticleComment.save();
       await session.commitTransaction();
+      return true;
     } catch (err) {
       Logger.log(err);
       await session.abortTransaction();
       throw new InternalServerErrorException();
+    } finally {
+      session.endSession();
     }
-    session.endSession();
-    return true;
   }
 
   async deleteComment(commentId: number, memberId: string) {
@@ -196,13 +197,14 @@ export class ArticlesService {
         { id: comment.articleId },
         { $inc: { commentCnt: -1 } },
       );
-      session.commitTransaction();
+      await session.commitTransaction();
     } catch (err) {
       Logger.log(err);
-      session.abortTransaction();
+      await session.abortTransaction();
       throw new InternalServerErrorException();
+    } finally {
+      session.endSession();
     }
-    session.endSession();
   }
 
   async likeArticle(articleId: string, memberId: string) {
@@ -225,15 +227,15 @@ export class ArticlesService {
         { id: articleId },
         { $inc: { likeCnt: 1 } },
       );
-      session.commitTransaction();
+      await session.commitTransaction();
+      return true;
     } catch (err) {
       Logger.error(err);
-      session.abortTransaction();
+      await session.abortTransaction();
       throw new BadRequestException();
+    } finally {
+      session.endSession();
     }
-
-    session.endSession();
-    return true;
   }
 
   async dislikeArticle(articleId: string, memberId: string) {
@@ -255,13 +257,14 @@ export class ArticlesService {
         { id: articleId },
         { $inc: { likeCnt: -1 } },
       );
-      session.commitTransaction();
+      await session.commitTransaction();
+      return true;
     } catch (err) {
       Logger.error(err);
-      session.abortTransaction();
+      await session.abortTransaction();
       throw new InternalServerErrorException();
+    } finally {
+      session.endSession();
     }
-    session.endSession();
-    return true;
   }
 }

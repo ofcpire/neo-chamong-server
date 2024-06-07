@@ -1,4 +1,9 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  Logger,
+} from '@nestjs/common';
 import { MemberInfoService } from 'src/service/members/member-info.service';
 import { Request } from 'express';
 import { AuthService } from 'src/service/members/auth.service';
@@ -14,12 +19,20 @@ export class OptionalAuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const token = this.extractToken(request);
     request.user = null;
-    if (!token) return true;
-    const payload = await this.authService.verifyToken(token, 'authorization');
-    const memberInfo = await this.memberInfoService.getMemberInfoById(
-      payload.id,
-    );
-    if (memberInfo) request.user = memberInfo;
+    if (token) {
+      try {
+        const payload = await this.authService.verifyToken(
+          token,
+          'authorization',
+        );
+        const memberInfo = await this.memberInfoService.getMemberInfoById(
+          payload.id,
+        );
+        if (memberInfo) request.user = memberInfo;
+      } catch (err) {
+        Logger.log('Token expired');
+      }
+    }
     return true;
   }
 

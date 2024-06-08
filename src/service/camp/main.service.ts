@@ -4,6 +4,7 @@ import { CampKeyword, CampList } from 'src/lib/dbBase/schema/campSchema';
 import { searchfields, areas, themes } from 'src/lib/variables/campVariables';
 import { Model } from 'mongoose';
 import { ReviewService } from './review.service';
+import { BookmarkService } from './bookmark.service';
 
 @Injectable()
 export class MainService {
@@ -11,25 +12,46 @@ export class MainService {
     @InjectModel(CampList.name) private campListModel: Model<CampList>,
     @InjectModel(CampKeyword.name) private campKeywordModel: Model<CampKeyword>,
     private readonly reviewService: ReviewService,
+    private readonly bookmarkService: BookmarkService,
   ) {}
   private readonly logger = new Logger(MainService.name);
-  async getCampByPage(page: number = 1, row: number = 30) {
+
+  async getCampByPage(page: number = 1, row: number = 30, memberId: string) {
     const skip = (page - 1) * row;
-    const campData = await this.campListModel.find({}).skip(skip).limit(row);
-    return campData;
+    const campData = await this.campListModel
+      .find({})
+      .skip(skip)
+      .limit(row)
+      .lean();
+
+    const campDataWithIsliked = await this.addBookmarkToCampArrayByMemberId(
+      campData,
+      memberId,
+    );
+
+    return campDataWithIsliked;
   }
 
-  async getCampByContentId(contentId: number) {
+  async getCampByContentId(contentId: number, memberId: string) {
     const campData = await this.campListModel.findOne({ contentId }).lean();
     const reviews =
       await this.reviewService.getReviewsForContentByContentId(contentId);
+    const campDataWithBookmarkInfo = await this.addBookmarkToCampByMemberId(
+      campData,
+      memberId,
+    );
     return {
-      ...campData,
+      ...campDataWithBookmarkInfo,
       reviews,
     };
   }
 
-  async getCampByKeywordId(keywordId: number = 1, page: number, row: number) {
+  async getCampByKeywordId(
+    keywordId: number = 1,
+    page: number,
+    row: number,
+    memberId: string,
+  ) {
     const keywords = await this.campKeywordModel.findOne({
       keywordId: keywordId,
     });
@@ -41,6 +63,7 @@ export class MainService {
       null,
       page,
       row,
+      memberId,
     );
     return campData;
   }
@@ -51,6 +74,7 @@ export class MainService {
     themeId: number | null = null,
     page: number = 1,
     row: number = 30,
+    memberId: string,
   ) {
     try {
       if (themeId) searchKeyword = [...searchKeyword, themes[themeId]];
@@ -76,11 +100,39 @@ export class MainService {
       const campData = await this.campListModel
         .find(queryOption)
         .skip(skip)
-        .limit(row);
-      return campData;
+        .limit(row)
+        .lean();
+      return await this.addBookmarkToCampArrayByMemberId(campData, memberId);
     } catch (err) {
       this.logger.error(err);
       throw new BadGatewayException(err);
     }
+  }
+
+  private async addBookmarkToCampArrayByMemberId(
+    campListArray: CampList[],
+    memberId: string,
+  ) {
+    if (!memberId) return campListArray;
+    const campListWithBookmarkInfo = await Promise.all(
+      campListArray.map(async (camp) => {
+        return await this.addBookmarkToCampByMemberId(camp, memberId);
+      }),
+    );
+    return campListWithBookmarkInfo;
+  }
+
+  private async addBookmarkToCampByMemberId(camp: CampList, memberId: string) {
+    if (!memberId) return camp;
+    const isBookmarked =
+      await this.bookmarkService.getBookmarkByContentIdAndMemberId(
+        camp.contentId,
+        memberId,
+      );
+    return {
+      ...camp,
+      bookmarked: !!isBookmarked,
+      bookmarkId: isBookmarked ? isBookmarked.bookmarkId : undefined,
+    };
   }
 }

@@ -1,12 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import { v4 as uuid } from 'uuid';
 
-@Schema()
+@Schema({ timestamps: true })
 export class Member extends Document {
-  @Prop()
+  @Prop({ default: uuid, unique: true })
   id: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
   email: string;
 
   @Prop({ required: true, default: '차몽인' })
@@ -26,6 +27,12 @@ export class Member extends Document {
 
   @Prop({ default: '정보 없음' })
   oilInfo: string;
+
+  @Prop({ type: Date })
+  createdAt: Date;
+
+  @Prop({ type: Date })
+  updatedAt: Date;
 }
 
 export const MemberSchema = SchemaFactory.createForClass(Member);

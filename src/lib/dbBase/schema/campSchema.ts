@@ -6,10 +6,10 @@ export class CampList extends Document {
   @Prop({ default: 0 })
   totalRating: number;
 
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
   contentId: number;
 
-  @Prop()
+  @Prop({ required: true })
   facltNm: string;
 
   @Prop()
@@ -90,35 +90,12 @@ export class CampList extends Document {
 
 export const CampListSchema = SchemaFactory.createForClass(CampList);
 
-@Schema()
-export class CampReview extends Document {
-  @Prop()
-  author: string;
-
-  @Prop({ type: Date, default: Date.now })
-  createdAt: Date;
-
-  @Prop({ type: Date, default: Date.now })
-  updatedAt: Date;
-
-  @Prop()
-  reviewId: number;
-
-  @Prop()
-  content: string;
-
-  @Prop()
-  rating: number;
-}
-
-export const CampReviewSchema = SchemaFactory.createForClass(CampReview);
-
 @Schema({ collection: 'keywords' })
 export class CampKeyword extends Document {
   @Prop()
   keywordId: number;
 
-  @Prop([String])
+  @Prop()
   keyword: string[];
 }
 

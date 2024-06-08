@@ -2,7 +2,7 @@ import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { v4 as uuid } from 'uuid';
 
-@Schema()
+@Schema({ timestamps: true })
 export class Article extends Document {
   @Prop({ required: true, default: uuid })
   id: string;
@@ -28,10 +28,10 @@ export class Article extends Document {
   @Prop({ required: true, default: 0 })
   likeCnt: number;
 
-  @Prop({ type: Date, default: Date.now })
+  @Prop({ type: Date })
   createdAt: Date;
 
-  @Prop({ type: Date, default: Date.now })
+  @Prop({ type: Date })
   updatedAt: Date;
 
   @Prop({ required: true, default: true })
@@ -40,9 +40,9 @@ export class Article extends Document {
 
 export const ArticleSchema = SchemaFactory.createForClass(Article);
 
-@Schema()
+@Schema({ timestamps: true })
 export class ArticleComment extends Document {
-  @Prop({ required: true, default: uuid })
+  @Prop({ required: true, default: uuid, unique: true })
   id: string;
 
   @Prop({ required: true })
@@ -57,22 +57,24 @@ export class ArticleComment extends Document {
   @Prop({ required: true, default: true })
   public: boolean;
 
-  @Prop({ default: Date.now, required: true })
+  @Prop({ type: Date })
   createdAt: Date;
 
-  @Prop({ default: Date.now, required: true })
+  @Prop({ type: Date })
   updateddAt: Date;
 }
 
 export const ArticleCommentSchema =
   SchemaFactory.createForClass(ArticleComment);
 
-@Schema()
+@Schema({ timestamps: true })
 export class ArticleLike extends Document {
   @Prop({ required: true })
   memberId: string;
   @Prop({ required: true })
   articleId: string;
+  @Prop({ type: Date })
+  createdAt: Date;
 }
 
 export const ArticleLikeSchema = SchemaFactory.createForClass(ArticleLike);

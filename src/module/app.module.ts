@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppService } from '../service/app.service';
 import { ConfigModule } from '@nestjs/config';
 import { CampModule } from './camp.module';
-import { MembersModule } from './members.module';
+import { MembersModule } from './members/members.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ArticlesModule } from './articles.module';
 

@@ -19,13 +19,12 @@ interface LoginBodyType {
 }
 
 @Controller('members')
-export class AuthController {
+export class MembersController {
   constructor(
     private readonly authService: AuthService,
-    private readonly jwtService: JwtService,
     private readonly memberInfoService: MemberInfoService,
   ) {}
-  private readonly logger = new Logger(AuthController.name);
+  private readonly logger = new Logger(MembersController.name);
 
   @Post('/login')
   async login(@Body() body: LoginBodyType, @Response() res: Res) {

@@ -15,6 +15,7 @@ import { Bookmark, BookmarkSchema } from 'src/lib/dbBase/schema/bookmarkSchema';
 import { BookmarkController } from 'src/controller/camp/bookmark.controller';
 import { BookmarkService } from 'src/service/camp/bookmark.service';
 import { AuthModule } from './auth.module';
+import { WishlistService } from 'src/service/camp/wishlist.service';
 
 @Module({
   imports: [
@@ -27,6 +28,6 @@ import { AuthModule } from './auth.module';
     AuthModule,
   ],
   controllers: [MainController, ReviewController, BookmarkController],
-  providers: [MainService, ReviewService, BookmarkService],
+  providers: [MainService, ReviewService, BookmarkService, WishlistService],
 })
 export class CampModule {}

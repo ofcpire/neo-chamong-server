@@ -5,6 +5,7 @@ import { CampModule } from './camp.module';
 import { MembersModule } from './members/members.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ArticlesModule } from './articles.module';
+import { PlaceModule } from './place.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { ArticlesModule } from './articles.module';
     MembersModule,
     CampModule,
     ArticlesModule,
+    PlaceModule,
     MongooseModule.forRoot(process.env.MONGODB_URL),
   ],
   providers: [AppService],

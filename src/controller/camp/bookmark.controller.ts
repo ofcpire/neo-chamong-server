@@ -1,5 +1,6 @@
 import {
   Controller,
+  Get,
   Post,
   Delete,
   Param,
@@ -7,16 +8,32 @@ import {
   UseGuards,
   Request,
   Response,
+  UseInterceptors,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/lib/interceptor/auth.guard';
 import { BookmarkService } from 'src/service/camp/bookmark.service';
 import { InterceptedRequest } from 'src/types/members';
 import { Response as Res } from 'express';
+import { WishlistService } from 'src/service/camp/wishlist.service';
+import { WrapContentInterceptor } from 'src/lib/interceptor/wrap-content.interceptor';
 
 @Controller('bookmark')
 export class BookmarkController {
-  constructor(private readonly bookmarkService: BookmarkService) {}
+  constructor(
+    private readonly bookmarkService: BookmarkService,
+    private readonly wishlistService: WishlistService,
+  ) {}
   private readonly logger = new Logger(BookmarkController.name);
+
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(WrapContentInterceptor)
+  async getBookmarkedCamp(@Request() req: InterceptedRequest) {
+    this.logger.log('Get /bookmark');
+    return await this.wishlistService.getBookmarkedCampsByMemberId(
+      req.user?.id,
+    );
+  }
 
   @Post('/:contentId')
   @UseGuards(JwtAuthGuard)

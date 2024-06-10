@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
 import { PickPlacesService } from 'src/service/place/pick-places.service';
 import { PickPlaceController } from 'src/controller/place/pick-places.controller';
 import { FormdataService } from 'src/service/util/formdata.service';

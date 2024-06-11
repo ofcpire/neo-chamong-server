@@ -13,7 +13,7 @@ export class CampService {
     private readonly reviewService: ReviewService,
   ) {}
 
-  async getCampByContentId(contentId: number, memberId: string) {
+  async getCampByContentId(contentId: number, memberId?: string) {
     const campData = await this.campListModel.findOne({ contentId }).lean();
     const reviews =
       await this.reviewService.getReviewsForContentByContentId(contentId);
@@ -52,5 +52,17 @@ export class CampService {
       bookmarked: !!isBookmarked,
       bookmarkId: isBookmarked ? isBookmarked.bookmarkId : undefined,
     };
+  }
+
+  async getReviewedCampsByMemberId(memberId: string) {
+    const contentIdList = (
+      await this.reviewService.getReviewesByMemberId(memberId)
+    ).map((review) => review.contentId);
+    const campData = await Promise.all(
+      contentIdList.map(async (contentId) => {
+        return await this.getCampByContentId(contentId);
+      }),
+    );
+    return campData;
   }
 }

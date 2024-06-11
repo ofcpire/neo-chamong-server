@@ -26,21 +26,30 @@ export class ArticlesService {
     private articleCommentModel: Model<ArticleComment>,
     private memberInfoService: MemberInfoService,
   ) {}
-  async getArticlesByPage(page: number = 1, row: number = 10) {
+  async getArticlesByPage(
+    page: number = 1,
+    row: number = 10,
+    memberId?: string,
+  ) {
     const skip = (page - 1) * row;
     const articleData = await this.articleModel
-      .find({
-        public: { $ne: false },
-      })
+      .find({})
       .sort({ createdAt: 1 })
       .skip(skip)
-      .limit(row);
-    return articleData.reverse();
+      .limit(row)
+      .lean();
+    const articleDataWithIsLiked = await this.addMemberInfoToAnything(
+      await this.addIsLikeToArticles(articleData, memberId),
+    );
+    return articleDataWithIsLiked.reverse();
   }
 
-  private async getArticleById(articleId: string) {
-    const articleData = await this.articleModel.findOne({ id: articleId });
-    return articleData;
+  private async getArticleById(articleId: string, lean: boolean = false) {
+    if (lean) return await this.articleModel.findOne({ id: articleId }).lean();
+    else
+      return await this.articleModel.findOne({
+        id: articleId,
+      });
   }
 
   async getArticleWithDetailsById(
@@ -61,29 +70,45 @@ export class ArticlesService {
     return {
       ...articleData,
       ...memberInfo,
-      likeCnt: articleLikes.length,
       comments: articleComments,
       commentCount: articleComments.length,
       isLiked,
     };
   }
 
+  private async addIsLikeToArticles(
+    articleArray: Article[],
+    memberId?: string,
+  ) {
+    if (!memberId) return articleArray;
+    else {
+      return await Promise.all(
+        articleArray.map(async (article) => {
+          const like = await this.articleLikeModel.findOne({
+            articleId: article.id,
+            memberId,
+          });
+          return {
+            ...article,
+            isLiked: !!like,
+          };
+        }),
+      );
+    }
+  }
+
   private async getCommentsByArticleId(articleId: string) {
     const comments = await this.articleCommentModel
       .find({
         articleId,
-        public: {
-          $ne: false,
-        },
       })
       .sort({ createdAt: 1 })
       .lean();
     return comments;
   }
 
-  private async getCommentsWithMemberInfo(articleId: string) {
-    const comments = await this.getCommentsByArticleId(articleId);
-    const memberIdList = Array.from(new Set(comments.map((e) => e.memberId)));
+  private async addMemberInfoToAnything(array: any[]) {
+    const memberIdList = Array.from(new Set(array.map((e) => e.memberId)));
     const memberInfos = await Promise.all(
       memberIdList.map(async (memberId) => {
         return await this.memberInfoService.getMemberInfoForArticleById(
@@ -91,15 +116,21 @@ export class ArticlesService {
         );
       }),
     );
-    const commentsWithMemberInfo = comments.map((comment) => {
+    const arrayWithMemberInfo = array.map((e) => {
       const memberInfo = memberInfos.find(
-        (memberInfo) => memberInfo.memberId === comment.memberId,
+        (memberInfo) => memberInfo.memberId === e.memberId,
       );
       return {
-        ...comment,
+        ...e,
         ...memberInfo,
       };
     });
+    return arrayWithMemberInfo;
+  }
+
+  private async getCommentsWithMemberInfo(articleId: string) {
+    const comments = await this.getCommentsByArticleId(articleId);
+    const commentsWithMemberInfo = await this.addMemberInfoToAnything(comments);
     return commentsWithMemberInfo;
   }
 
@@ -138,24 +169,6 @@ export class ArticlesService {
     if (memberId === articleData.memberId) {
       articleData.public = false;
       await articleData.save();
-    }
-  }
-
-  async extractArticleBody(
-    files:
-      | {
-          [fieldname: string]: Express.Multer.File[];
-        }
-      | Express.Multer.File[],
-    key: string,
-  ) {
-    if (!Array.isArray(files)) throw new BadRequestException();
-    const articleString = files.find((e) => e.fieldname === key).buffer;
-    if (articleString) {
-      const articleBody = JSON.parse(articleString as unknown as string);
-      return articleBody;
-    } else {
-      throw new BadRequestException();
     }
   }
 
@@ -265,6 +278,60 @@ export class ArticlesService {
       throw new InternalServerErrorException();
     } finally {
       session.endSession();
+    }
+  }
+
+  async getArticlesByMemberId(memberId: string) {
+    const articles = await this.articleModel
+      .find({ memberId })
+      .sort({ createdAt: -1 })
+      .lean();
+    return await this.addIsLikeToArticles(articles, memberId);
+  }
+
+  async getCommentedArticlesByMemberId(memberId: string) {
+    try {
+      const articleComments = await this.articleCommentModel
+        .find({ memberId })
+        .sort({ createdAt: -1 })
+        .lean();
+      const articleIdList = Array.from(
+        new Set(articleComments.map((comment) => comment.articleId)),
+      ) as string[];
+      const articleData = await Promise.all(
+        articleIdList.map(async (articleId) => {
+          return await this.getArticleById(articleId, true);
+        }),
+      );
+      return await this.addIsLikeToArticles(
+        articleData.filter((article) => !!article),
+        memberId,
+      );
+    } catch (err) {
+      throw new Error(err);
+    }
+  }
+
+  async getLikedArticlesByMemberId(memberId: string) {
+    try {
+      const articleIdList = (
+        await this.articleLikeModel
+          .find({ memberId })
+          .sort({ createdAt: -1 })
+          .lean()
+      ).map((articleLike) => articleLike.articleId);
+      const articleData = await Promise.all(
+        articleIdList.map(async (articleId) => {
+          return await this.getArticleById(articleId, true);
+        }),
+      );
+      return await this.addIsLikeToArticles(
+        articleData.filter((article) => !!article),
+        memberId,
+      );
+    } catch (err) {
+      Logger.error(err);
+      throw new Error(err);
     }
   }
 }

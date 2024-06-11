@@ -40,6 +40,11 @@ export class Article extends Document {
 
 export const ArticleSchema = SchemaFactory.createForClass(Article);
 
+ArticleSchema.pre(['find', 'findOne'], function (next) {
+  this.where({ public: true });
+  next();
+});
+
 @Schema({ timestamps: true })
 export class ArticleComment extends Document {
   @Prop({ required: true, default: uuid, unique: true })
@@ -66,6 +71,11 @@ export class ArticleComment extends Document {
 
 export const ArticleCommentSchema =
   SchemaFactory.createForClass(ArticleComment);
+
+ArticleCommentSchema.pre(['find', 'findOne'], function (next) {
+  this.where({ public: true });
+  next();
+});
 
 @Schema({ timestamps: true })
 export class ArticleLike extends Document {

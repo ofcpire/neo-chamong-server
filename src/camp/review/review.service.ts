@@ -147,4 +147,11 @@ export class ReviewService {
       throw new Error(err);
     }
   }
+
+  async getReviewesByMemberId(memberId: string) {
+    return await this.reviewModel
+      .find({ memberId })
+      .sort({ createdAt: -1 })
+      .lean();
+  }
 }

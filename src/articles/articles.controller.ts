@@ -22,21 +22,30 @@ import { InterceptedRequest } from 'src/members/members';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { CreateArticleCommentDto } from 'src/articles/dto/articles.dto';
 import { OptionalAuthGuard } from 'src/auth/optional-auth.interceptor';
+import { FormdataService } from 'src/common/utils/services/formdata.service';
 
 @Controller('articles')
 export class ArticlesController {
-  constructor(private readonly articlesService: ArticlesService) {}
+  constructor(
+    private readonly articlesService: ArticlesService,
+    private readonly formdataService: FormdataService,
+  ) {}
   private readonly logger = new Logger(ArticlesController.name);
 
   @Get()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OptionalAuthGuard)
   @UseInterceptors(WrapContentInterceptor)
   async getArticles(
     @Query('page') page: number = 1,
     @Query('row') row: number = 10,
+    @Request() req: InterceptedRequest,
   ) {
-    console.log(`Get /articles?page=${page}&row=${row}`);
-    return await this.articlesService.getArticlesByPage(page, row);
+    this.logger.log(`Get /articles?page=${page}&row=${row}`);
+    return await this.articlesService.getArticlesByPage(
+      page,
+      row,
+      req.user?.id,
+    );
   }
 
   @Get('/popular-app')
@@ -68,7 +77,10 @@ export class ArticlesController {
   @UseInterceptors(AnyFilesInterceptor())
   async postArticles(@Request() req: InterceptedRequest, @Response() res: Res) {
     const id = await this.articlesService.postArticle(
-      await this.articlesService.extractArticleBody(req.files, 'articleCreate'),
+      await this.formdataService.extractFormDataBodyByKey(
+        req.files,
+        'articleCreate',
+      ),
       req.user.id,
     );
     res.status(201).send({ id });
@@ -83,7 +95,10 @@ export class ArticlesController {
     @Response() res: Res,
   ) {
     await this.articlesService.patchArticle(
-      await this.articlesService.extractArticleBody(req.files, 'articleUpdate'),
+      await this.formdataService.extractFormDataBodyByKey(
+        req.files,
+        'articleUpdate',
+      ),
       req.user.id,
       articleId,
     );

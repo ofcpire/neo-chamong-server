@@ -20,16 +20,16 @@ import { ArticlesService } from 'src/articles/articles.service';
 import { WrapContentInterceptor } from 'src/common/utils/interceptor/wrap-content.interceptor';
 import { InterceptedRequest } from 'src/members/members';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
-import { CreateArticleCommentDto } from 'src/articles/dto/articles.dto';
+import {
+  CreateArticleDto,
+  CreateArticleCommentDto,
+} from 'src/articles/dto/articles.dto';
 import { OptionalAuthGuard } from 'src/auth/optional-auth.interceptor';
-import { FormdataService } from 'src/common/utils/services/formdata.service';
+import { JsonExtractInterceptor } from 'src/common/utils/interceptor/json-extract.interceptor';
 
 @Controller('articles')
 export class ArticlesController {
-  constructor(
-    private readonly articlesService: ArticlesService,
-    private readonly formdataService: FormdataService,
-  ) {}
+  constructor(private readonly articlesService: ArticlesService) {}
   private readonly logger = new Logger(ArticlesController.name);
 
   @Get()
@@ -74,13 +74,14 @@ export class ArticlesController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(AnyFilesInterceptor())
-  async postArticles(@Request() req: InterceptedRequest, @Response() res: Res) {
+  @UseInterceptors(AnyFilesInterceptor(), JsonExtractInterceptor)
+  async postArticles(
+    @Request() req: InterceptedRequest,
+    @Response() res: Res,
+    @Body() CreateArticleDto: CreateArticleDto,
+  ) {
     const id = await this.articlesService.postArticle(
-      await this.formdataService.extractFormDataBodyByKey(
-        req.files,
-        'articleCreate',
-      ),
+      CreateArticleDto,
       req.user.id,
     );
     res.status(201).send({ id });
@@ -88,17 +89,15 @@ export class ArticlesController {
 
   @Patch('/:articleId')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(AnyFilesInterceptor())
+  @UseInterceptors(AnyFilesInterceptor(), JsonExtractInterceptor)
   async patchArticles(
     @Param('articleId') articleId: string,
     @Request() req: InterceptedRequest,
     @Response() res: Res,
+    @Body() CreateArticleDto: CreateArticleDto,
   ) {
     await this.articlesService.patchArticle(
-      await this.formdataService.extractFormDataBodyByKey(
-        req.files,
-        'articleUpdate',
-      ),
+      CreateArticleDto,
       req.user.id,
       articleId,
     );

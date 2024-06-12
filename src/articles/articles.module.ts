@@ -11,7 +11,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ArticlesController } from 'src/articles/articles.controller';
 import { ArticlesService } from 'src/articles/articles.service';
 import { AuthModule } from '../auth/auth.module';
-import { FormdataService } from 'src/common/utils/services/formdata.service';
 
 @Module({
   imports: [
@@ -24,6 +23,6 @@ import { FormdataService } from 'src/common/utils/services/formdata.service';
     AuthModule,
   ],
   controllers: [ArticlesController],
-  providers: [ArticlesService, FormdataService],
+  providers: [ArticlesService],
 })
 export class ArticlesModule {}

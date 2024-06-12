@@ -7,9 +7,6 @@ export class CreateArticleDto {
 
   @IsString()
   content: string;
-
-  @IsString()
-  articleImg: string;
 }
 
 export class CreateArticleCommentDto {

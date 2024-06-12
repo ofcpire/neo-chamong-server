@@ -10,35 +10,32 @@ import {
   Request,
   UseInterceptors,
   Patch,
+  Body,
 } from '@nestjs/common';
 import { Response as Res } from 'express';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { PickPlacesService } from 'src/place/pick-place/pick-places.service';
-import { FormdataService } from 'src/common/utils/services/formdata.service';
 import { InterceptedRequest } from 'src/members/members';
+import { JsonExtractInterceptor } from 'src/common/utils/interceptor/json-extract.interceptor';
+import { CreatePickPlaceDto } from './pick-places.dto';
 
 @Controller('pick-places')
 @UseGuards(JwtAuthGuard)
 export class PickPlaceController {
-  constructor(
-    private readonly pickPlaceService: PickPlacesService,
-    private readonly formDataService: FormdataService,
-  ) {}
+  constructor(private readonly pickPlaceService: PickPlacesService) {}
   private readonly logger = new Logger(PickPlaceController.name);
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(AnyFilesInterceptor())
+  @UseInterceptors(AnyFilesInterceptor(), JsonExtractInterceptor)
   async postPickPlaces(
     @Response() res: Res,
     @Request() req: InterceptedRequest,
+    @Body() CreatePickPlaceDto: CreatePickPlaceDto,
   ) {
     const result = await this.pickPlaceService.postPickPlaces(
-      await this.formDataService.extractFormDataBodyByKey(
-        req.files,
-        'postMyPlace',
-      ),
+      CreatePickPlaceDto,
       req.user.id,
     );
     return res.status(201).send(result);
@@ -46,17 +43,15 @@ export class PickPlaceController {
 
   @Patch('/:myPlaceId')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(AnyFilesInterceptor())
+  @UseInterceptors(AnyFilesInterceptor(), JsonExtractInterceptor)
   async patchPickPlaces(
     @Response() res: Res,
     @Param('myPlaceId') myPlaceId: string,
     @Request() req: InterceptedRequest,
+    @Body() CreatePickPlaceDto: CreatePickPlaceDto,
   ) {
     const result = await this.pickPlaceService.patchPickPlaces(
-      await this.formDataService.extractFormDataBodyByKey(
-        req.files,
-        'patchMyPlace',
-      ),
+      CreatePickPlaceDto,
       myPlaceId,
       req.user.id,
     );

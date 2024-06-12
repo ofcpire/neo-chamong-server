@@ -13,4 +13,5 @@ export interface MemberInfoType {
 
 export interface InterceptedRequest extends Request {
   user: MemberInfoType;
+  jsonFile: any;
 }

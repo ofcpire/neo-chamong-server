@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PickPlacesService } from 'src/place/pick-place/pick-places.service';
 import { PickPlaceController } from 'src/place/pick-place/pick-places.controller';
-import { FormdataService } from 'src/common/utils/services/formdata.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PickPlace, PickPlaceSchema } from './pick-place.schema';
 import { AuthModule } from 'src/auth/auth.module';
@@ -14,6 +13,6 @@ import { AuthModule } from 'src/auth/auth.module';
     AuthModule,
   ],
   controllers: [PickPlaceController],
-  providers: [PickPlacesService, FormdataService],
+  providers: [PickPlacesService],
 })
 export class PickPlaceModule {}

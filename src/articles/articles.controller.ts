@@ -34,16 +34,15 @@ export class ArticlesController {
 
   @Get()
   @UseGuards(OptionalAuthGuard)
-  @UseInterceptors(WrapContentInterceptor)
   async getArticles(
     @Query('page') page: number = 1,
-    @Query('row') row: number = 10,
+    @Query('size') size: number = 15,
     @Request() req: InterceptedRequest,
   ) {
-    this.logger.log(`Get /articles?page=${page}&row=${row}`);
+    this.logger.log(`Get /articles?page=${page}&size=${size}`);
     return await this.articlesService.getArticlesByPage(
       page,
-      row,
+      size,
       req.user?.id,
     );
   }

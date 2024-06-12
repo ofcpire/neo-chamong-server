@@ -28,20 +28,26 @@ export class ArticlesService {
   ) {}
   async getArticlesByPage(
     page: number = 1,
-    row: number = 10,
+    size: number = 15,
     memberId?: string,
   ) {
-    const skip = (page - 1) * row;
+    const skip = (page - 1) * size;
+    const totalElements = await this.articleModel.countDocuments({
+      public: { $ne: false },
+    });
     const articleData = await this.articleModel
       .find({})
-      .sort({ createdAt: 1 })
+      .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(row)
+      .limit(size)
       .lean();
     const articleDataWithIsLiked = await this.addMemberInfoToAnything(
       await this.addIsLikeToArticles(articleData, memberId),
     );
-    return articleDataWithIsLiked.reverse();
+    return {
+      content: articleDataWithIsLiked,
+      totalElements,
+    };
   }
 
   private async getArticleById(articleId: string, lean: boolean = false) {

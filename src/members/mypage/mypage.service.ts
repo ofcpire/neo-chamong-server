@@ -9,10 +9,15 @@ import { ArticlesService } from 'src/articles/articles.service';
 import { BookmarkService } from 'src/camp/bookmark/bookmark.service';
 import { ReviewService } from 'src/camp/review/review.service';
 import { CampService } from 'src/camp/camp.service';
+import { PatchMemberDto } from '../dto/patch-member.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Member } from '../member.schema';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class MypageService {
   constructor(
+    @InjectModel(Member.name) private memberModel: Model<Member>,
     private readonly memberInfoService: MemberInfoService,
     private readonly pickPlaceService: PickPlacesService,
     private readonly articlesService: ArticlesService,
@@ -34,6 +39,20 @@ export class MypageService {
         likedArticleInfos:
           await this.articlesService.getLikedArticlesByMemberId(memberId),
       };
+    } catch (err) {
+      Logger.error(err);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async patchMemberProfile(PatchMemberDto: PatchMemberDto, memberId) {
+    try {
+      return await this.memberModel.updateOne(
+        { id: memberId },
+        {
+          ...PatchMemberDto,
+        },
+      );
     } catch (err) {
       Logger.error(err);
       throw new InternalServerErrorException();

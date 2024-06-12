@@ -23,9 +23,12 @@ import {
   PickPlaceSchema,
 } from 'src/place/pick-place/pick-place.schema';
 import { CampService } from 'src/camp/camp.service';
+import { Member, MemberSchema } from '../member.schema';
+
 @Module({
   imports: [
     MongooseModule.forFeature([
+      { name: Member.name, schema: MemberSchema },
       { name: Review.name, schema: ReviewSchema },
       { name: CampList.name, schema: CampListSchema },
       { name: Bookmark.name, schema: BookmarkSchema },

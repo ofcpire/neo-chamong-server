@@ -26,17 +26,27 @@ export class ArticlesService {
     private articleCommentModel: Model<ArticleComment>,
     private memberInfoService: MemberInfoService,
   ) {}
-  async getArticlesByPage(
+  async getArticlesByPageAndKeyword(
     page: number = 1,
     size: number = 15,
+    keyword: string | undefined,
     memberId?: string,
   ) {
+    if (page <= 0) page = 1;
     const skip = (page - 1) * size;
     const totalElements = await this.articleModel.countDocuments({
       public: { $ne: false },
     });
+    const query = keyword
+      ? {
+          $or: [
+            { title: { $regex: keyword, $options: 'i' } },
+            { content: { $regex: keyword, $options: 'i' } },
+          ],
+        }
+      : {};
     const articleData = await this.articleModel
-      .find({})
+      .find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(size)
@@ -144,6 +154,7 @@ export class ArticlesService {
     try {
       const createdArticle = new this.articleModel({
         ...CreateArticleDto,
+        articleImg: CreateArticleDto.imgSrc,
         memberId,
       });
       await createdArticle.save();

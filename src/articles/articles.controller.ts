@@ -17,7 +17,6 @@ import {
 import { Response as Res } from 'express';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { ArticlesService } from 'src/articles/articles.service';
-import { WrapContentInterceptor } from 'src/common/utils/interceptor/wrap-content.interceptor';
 import { InterceptedRequest } from 'src/members/members';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import {
@@ -26,6 +25,7 @@ import {
 } from 'src/articles/dto/articles.dto';
 import { OptionalAuthGuard } from 'src/auth/optional-auth.interceptor';
 import { JsonExtractInterceptor } from 'src/common/utils/interceptor/json-extract.interceptor';
+import { ImageExtractInterceptor } from 'src/common/utils/interceptor/image-extract.interceptor';
 
 @Controller('articles')
 export class ArticlesController {
@@ -38,11 +38,15 @@ export class ArticlesController {
     @Query('page') page: number = 1,
     @Query('size') size: number = 15,
     @Request() req: InterceptedRequest,
+    @Query('keyword') keyword?: string,
   ) {
-    this.logger.log(`Get /articles?page=${page}&size=${size}`);
-    return await this.articlesService.getArticlesByPage(
+    this.logger.log(
+      `Get /articles?keyword=${keyword}&page=${page}&size=${size}`,
+    );
+    return await this.articlesService.getArticlesByPageAndKeyword(
       page,
       size,
+      keyword,
       req.user?.id,
     );
   }
@@ -73,7 +77,11 @@ export class ArticlesController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(AnyFilesInterceptor(), JsonExtractInterceptor)
+  @UseInterceptors(
+    AnyFilesInterceptor(),
+    JsonExtractInterceptor,
+    ImageExtractInterceptor,
+  )
   async postArticles(
     @Request() req: InterceptedRequest,
     @Response() res: Res,

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
@@ -18,6 +18,7 @@ export class MemberInfoService {
         id,
       })
       .lean();
+    if (!memberInfo) throw new NotFoundException();
     memberInfo.password = undefined;
     return memberInfo;
   }

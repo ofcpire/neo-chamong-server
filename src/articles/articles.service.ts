@@ -61,7 +61,10 @@ export class ArticlesService {
   }
 
   private async getArticleById(articleId: string, lean: boolean = false) {
-    if (lean) return await this.articleModel.findOne({ id: articleId }).lean();
+    if (lean)
+      return await this.articleModel
+        .findOne({ id: articleId })
+        .lean({ virtuals: true });
     else
       return await this.articleModel.findOne({
         id: articleId,
@@ -77,8 +80,9 @@ export class ArticlesService {
     articleDocument.save();
     const articleData = articleDocument.toObject();
     const articleLikes = await this.articleLikeModel.find({ articleId }).lean();
-    const memberInfo =
-      await this.memberInfoService.getMemberInfoForArticleById(memberId);
+    const memberInfo = await this.memberInfoService.getMemberInfoForArticleById(
+      articleData.memberId,
+    );
     const isLiked = memberId
       ? articleLikes.some((like) => like.memberId === memberId)
       : false;
@@ -154,7 +158,7 @@ export class ArticlesService {
     try {
       const createdArticle = new this.articleModel({
         ...CreateArticleDto,
-        articleImg: CreateArticleDto.imgSrc,
+        imgName: CreateArticleDto.imgName,
         memberId,
       });
       await createdArticle.save();

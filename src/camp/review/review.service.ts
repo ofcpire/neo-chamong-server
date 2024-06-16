@@ -10,13 +10,13 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Review } from './review.schema';
 import { CreateReviewDto } from 'src/camp/review/dto/review.dto';
 import { Model } from 'mongoose';
-import { MemberInfoService } from '../../members/member-info.service';
+import { MemberService } from '../../members/member.service';
 import { CampList } from 'src/camp/campSchema';
 
 @Injectable()
 export class ReviewService {
   constructor(
-    private readonly memberInfoService: MemberInfoService,
+    private readonly memberService: MemberService,
     @InjectModel(Review.name) private reviewModel: Model<Review>,
     @InjectModel(CampList.name) private campListModel: Model<CampList>,
   ) {}
@@ -25,7 +25,7 @@ export class ReviewService {
       const reviews = await this.reviewModel.find({ contentId }).lean();
       const reviewsWithMemberInfo = await Promise.all(
         reviews.map(async (review) => {
-          const memberInfo = await this.memberInfoService.getMemberInfoById(
+          const memberInfo = await this.memberService.getMemberInfoById(
             review.memberId,
           );
           return {

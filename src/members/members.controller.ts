@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { Response as Res } from 'express';
 import { AuthService } from 'src/auth/auth.service';
-import { MemberInfoService } from 'src/members/member-info.service';
+import { MemberService } from 'src/members/member.service';
 
 interface LoginBodyType {
   nickname: string;
@@ -21,7 +21,7 @@ interface LoginBodyType {
 export class MembersController {
   constructor(
     private readonly authService: AuthService,
-    private readonly memberInfoService: MemberInfoService,
+    private readonly memberService: MemberService,
   ) {}
   private readonly logger = new Logger(MembersController.name);
 
@@ -56,7 +56,7 @@ export class MembersController {
         authorization,
         'authorization',
       );
-      const memberInfo = await this.memberInfoService.getMemberInfoById(
+      const memberInfo = await this.memberService.getMemberInfoById(
         authTokenPayload.id,
       );
       res.send(memberInfo);
@@ -69,7 +69,7 @@ export class MembersController {
         const newAccessToken = await this.authService.accessTokenSign(
           refreshTokenPayload.id,
         );
-        const memberInfo = await this.memberInfoService.getMemberInfoById(
+        const memberInfo = await this.memberService.getMemberInfoById(
           refreshTokenPayload.id,
         );
         res.setHeader('authorization', newAccessToken).send(memberInfo);

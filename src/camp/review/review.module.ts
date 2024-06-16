@@ -5,7 +5,7 @@ import { ReviewController } from 'src/camp/review/review.controller';
 import { Review, ReviewSchema } from './review.schema';
 import { AuthModule } from 'src/auth/auth.module';
 import { CampList, CampListSchema } from '../campSchema';
-import { MemberInfoService } from 'src/members/member-info.service';
+import { MemberService } from 'src/members/member.service';
 import { Member, MemberSchema } from 'src/members/member.schema';
 
 @Module({
@@ -18,7 +18,7 @@ import { Member, MemberSchema } from 'src/members/member.schema';
     AuthModule,
   ],
   controllers: [ReviewController],
-  providers: [ReviewService, MemberInfoService],
+  providers: [ReviewService, MemberService],
   exports: [ReviewService],
 })
 export class ReviewModule {}

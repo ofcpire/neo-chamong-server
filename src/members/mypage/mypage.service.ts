@@ -3,7 +3,7 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import { MemberInfoService } from '../member-info.service';
+import { MemberService } from '../member.service';
 import { PickPlacesService } from 'src/place/pick-place/pick-places.service';
 import { ArticlesService } from 'src/articles/articles.service';
 import { BookmarkService } from 'src/camp/bookmark/bookmark.service';
@@ -18,7 +18,7 @@ import { Model } from 'mongoose';
 export class MypageService {
   constructor(
     @InjectModel(Member.name) private memberModel: Model<Member>,
-    private readonly memberInfoService: MemberInfoService,
+    private readonly memberService: MemberService,
     private readonly pickPlaceService: PickPlacesService,
     private readonly articlesService: ArticlesService,
     private readonly bookmarkService: BookmarkService,
@@ -28,7 +28,7 @@ export class MypageService {
   async getMypageByMemberId(memberId: string) {
     try {
       return {
-        memberInfo: await this.memberInfoService.getMemberInfoById(memberId),
+        memberInfo: await this.memberService.getMemberInfoById(memberId),
         myPlaceInfos: await this.pickPlaceService.getMyPickPlaces(memberId),
         visitedPlaceInfos:
           await this.campService.getReviewedCampsByMemberId(memberId),

@@ -6,7 +6,7 @@ import { Model } from 'mongoose';
 import { Member } from './member.schema';
 
 @Injectable()
-export class MemberInfoService {
+export class MemberService {
   constructor(
     @InjectModel(Member.name) private memberModel: Model<Member>,
     private jwtService: JwtService,

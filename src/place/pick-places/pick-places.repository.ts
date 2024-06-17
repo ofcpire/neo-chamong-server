@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { PickPlace } from './pick-place.schema';
+import { PickPlace } from './pick-places.schema';
 import { Model } from 'mongoose';
 import { CreatePickPlaceDto } from './dto/pick-places.dto';
-import { FilterQuery } from 'mongoose';
 
 @Injectable()
 export class PickPlaceRepository {

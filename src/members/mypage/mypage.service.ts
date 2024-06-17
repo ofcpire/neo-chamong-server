@@ -4,7 +4,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { MemberService } from '../member.service';
-import { PickPlacesService } from 'src/place/pick-place/pick-places.service';
+import { PickPlacesService } from 'src/place/pick-places/pick-places.service';
 import { ArticlesService } from 'src/articles/articles.service';
 import { BookmarkService } from 'src/camp/bookmark/bookmark.service';
 import { ReviewService } from 'src/camp/review/review.service';

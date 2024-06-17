@@ -15,7 +15,7 @@ import {
 import { Response as Res } from 'express';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
-import { PickPlacesService } from 'src/place/pick-place/pick-places.service';
+import { PickPlacesService } from 'src/place/pick-places/pick-places.service';
 import { InterceptedRequest } from 'src/members/members';
 import { JsonExtractInterceptor } from 'src/common/utils/interceptor/json-extract.interceptor';
 import { CreatePickPlaceDto } from './dto/pick-places.dto';

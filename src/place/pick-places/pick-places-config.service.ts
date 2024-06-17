@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { SchemaUtilHelper } from 'src/common/utils/utils/schema-util.helper';
-import { PickPlace, PickPlaceSchema } from './pick-place.schema';
+import { PickPlace, PickPlaceSchema } from './pick-places.schema';
 import * as _ from 'mongoose-lean-virtuals';
 const schemaUtilHelper = new SchemaUtilHelper();
 

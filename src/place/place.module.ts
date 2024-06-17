@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { PickPlace, PickPlaceSchema } from './pick-place/pick-place.schema';
+import { PickPlace, PickPlaceSchema } from './pick-places/pick-places.schema';
 import { AuthModule } from '../auth/auth.module';
-import { PickPlaceModule } from './pick-place/pick-place.module';
+import { PickPlaceModule } from './pick-places/pick-places.module';
 
 @Module({
   imports: [

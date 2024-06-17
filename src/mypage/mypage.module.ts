@@ -6,7 +6,7 @@ import { ReviewService } from 'src/camp/review/review.service';
 import { Review, ReviewSchema } from 'src/camp/review/review.schema';
 import { CampList, CampListSchema } from 'src/camp/campSchema';
 import { AuthModule } from 'src/auth/auth.module';
-import { PickPlacesService } from 'src/place/pick-place/pick-places.service';
+import { PickPlacesService } from 'src/place/pick-places/pick-places.service';
 import { ArticlesService } from 'src/articles/articles.service';
 import { BookmarkService } from 'src/camp/bookmark/bookmark.service';
 import { Member, MemberSchema } from 'src/members/member.schema';
@@ -22,14 +22,14 @@ import {
 import {
   PickPlace,
   PickPlaceSchema,
-} from 'src/place/pick-place/pick-place.schema';
+} from 'src/place/pick-places/pick-places.schema';
 import { CampService } from 'src/camp/camp.service';
 import { ArticlesModule } from 'src/articles/articles.module';
 import { MembersModule } from 'src/members/members.module';
 import { MemberRepository } from 'src/members/member.repository';
 import { ReviewModule } from 'src/camp/review/review.module';
 import { CampModule } from 'src/camp/camp.module';
-import { PickPlaceModule } from 'src/place/pick-place/pick-place.module';
+import { PickPlaceModule } from 'src/place/pick-places/pick-places.module';
 
 @Module({
   imports: [

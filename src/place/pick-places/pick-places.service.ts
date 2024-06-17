@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { CreatePickPlaceDto } from './dto/pick-places.dto';
-import { PickPlaceRepository } from './pick-place.repository';
+import { PickPlaceRepository } from './pick-places.repository';
 import { PickPlacesConfigService } from './pick-places-config.service';
 
 @Injectable()

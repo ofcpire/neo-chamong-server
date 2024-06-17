@@ -1,14 +1,15 @@
 import { Module } from '@nestjs/common';
-import { MypageController } from 'src/members/mypage/mypage.controller';
+import { MypageController } from './mypage.controller';
 import { MongooseModule } from '@nestjs/mongoose';
-import { MypageService } from 'src/members/mypage/mypage.service';
+import { MypageService } from './mypage.service';
 import { ReviewService } from 'src/camp/review/review.service';
 import { Review, ReviewSchema } from 'src/camp/review/review.schema';
 import { CampList, CampListSchema } from 'src/camp/campSchema';
-import { AuthModule } from '../../auth/auth.module';
+import { AuthModule } from 'src/auth/auth.module';
 import { PickPlacesService } from 'src/place/pick-place/pick-places.service';
 import { ArticlesService } from 'src/articles/articles.service';
 import { BookmarkService } from 'src/camp/bookmark/bookmark.service';
+import { Member, MemberSchema } from 'src/members/member.schema';
 import { Bookmark, BookmarkSchema } from 'src/camp/bookmark/bookmark.schema';
 import {
   Article,
@@ -23,9 +24,12 @@ import {
   PickPlaceSchema,
 } from 'src/place/pick-place/pick-place.schema';
 import { CampService } from 'src/camp/camp.service';
-import { Member, MemberSchema } from '../member.schema';
 import { ArticlesModule } from 'src/articles/articles.module';
-import { SchemaUtilHelper } from 'src/common/utils/utils/schema-util.helper';
+import { MembersModule } from 'src/members/members.module';
+import { MemberRepository } from 'src/members/member.repository';
+import { ReviewModule } from 'src/camp/review/review.module';
+import { CampModule } from 'src/camp/camp.module';
+import { PickPlaceModule } from 'src/place/pick-place/pick-place.module';
 
 @Module({
   imports: [
@@ -41,6 +45,10 @@ import { SchemaUtilHelper } from 'src/common/utils/utils/schema-util.helper';
     ]),
     AuthModule,
     ArticlesModule,
+    MembersModule,
+    ReviewModule,
+    CampModule,
+    PickPlaceModule,
   ],
   controllers: [MypageController],
   providers: [
@@ -50,7 +58,7 @@ import { SchemaUtilHelper } from 'src/common/utils/utils/schema-util.helper';
     PickPlacesService,
     ArticlesService,
     BookmarkService,
-    SchemaUtilHelper,
+    MemberRepository,
   ],
 })
 export class MypageModule {}

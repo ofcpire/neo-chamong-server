@@ -6,26 +6,27 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Review } from './review.schema';
+import { InjectConnection } from '@nestjs/mongoose';
 import { CreateReviewDto } from 'src/camp/review/dto/review.dto';
-import { Model } from 'mongoose';
-import { MemberService } from '../../members/member.service';
-import { CampList } from 'src/camp/campSchema';
+import { MemberRepository } from 'src/members/member.repository';
+import { ReviewRepository } from './review.repository';
+import { Connection } from 'mongoose';
+import { CampRepository } from '../camp.repository';
 
 @Injectable()
 export class ReviewService {
   constructor(
-    private readonly memberService: MemberService,
-    @InjectModel(Review.name) private reviewModel: Model<Review>,
-    @InjectModel(CampList.name) private campListModel: Model<CampList>,
+    private readonly memberRepository: MemberRepository,
+    private readonly reviewRepository: ReviewRepository,
+    private readonly campRepository: CampRepository,
+    @InjectConnection() private connection: Connection,
   ) {}
   async getReviewsForContentByContentId(contentId: number) {
     try {
-      const reviews = await this.reviewModel.find({ contentId }).lean();
+      const reviews = await this.reviewRepository.fetchReviews({ contentId });
       const reviewsWithMemberInfo = await Promise.all(
         reviews.map(async (review) => {
-          const memberInfo = await this.memberService.getMemberInfoById(
+          const memberInfo = await this.memberRepository.fetchMemberInfoById(
             review.memberId,
           );
           return {
@@ -45,19 +46,22 @@ export class ReviewService {
     contentId: number,
     memberId: string,
   ) {
-    if (await this.reviewModel.findOne({ contentId, memberId }))
+    if (
+      await this.reviewRepository.fetchOneReview({
+        contentId,
+        memberId,
+      })
+    )
       throw new ConflictException();
-    const newReview = new this.reviewModel({
-      contentId,
-      content: CreateReviewDto.content,
-      rating: CreateReviewDto.rating,
-      memberId,
-    });
-    const session = await this.reviewModel.db.startSession();
+    const session = await this.connection.startSession();
     try {
       session.startTransaction();
       await this.updateRatingsOfContent(contentId, CreateReviewDto.rating);
-      await newReview.save();
+      await this.reviewRepository.saveNewReview(
+        CreateReviewDto,
+        contentId,
+        memberId,
+      );
       await session.commitTransaction();
       return true;
     } catch (err) {
@@ -74,23 +78,17 @@ export class ReviewService {
     reviewId: string,
     memberId: string,
   ) {
-    const existReview = await this.reviewModel.findOne({ reviewId }).lean();
+    const existReview = await this.reviewRepository.fetchOneReview({
+      reviewId,
+    });
     if (!existReview) throw new NotFoundException();
     else if (existReview.memberId !== memberId)
       throw new UnauthorizedException();
 
-    const session = await this.reviewModel.db.startSession();
+    const session = await this.connection.startSession();
     session.startTransaction();
     try {
-      await this.reviewModel.updateOne(
-        { reviewId },
-        {
-          $set: {
-            content: CreateReviewDto.content,
-            rating: CreateReviewDto.rating,
-          },
-        },
-      );
+      await this.reviewRepository.patchReview(CreateReviewDto, reviewId);
       await this.updateRatingsOfContent(existReview.contentId, null);
       await session.commitTransaction();
       return true;
@@ -104,14 +102,14 @@ export class ReviewService {
   }
 
   async deleteReview(reviewId: string, memberId: string) {
-    const review = await this.reviewModel.findOne({ reviewId }).lean();
+    const review = await this.reviewRepository.fetchOneReview({ reviewId });
     if (!review) throw new NotFoundException();
     else if (review.memberId !== memberId) throw new UnauthorizedException();
     const contentId = review.contentId;
-    const session = await this.reviewModel.db.startSession();
+    const session = await this.connection.startSession();
     session.startTransaction();
     try {
-      await this.reviewModel.deleteOne({ reviewId, memberId });
+      await this.reviewRepository.deleteOneReview(reviewId);
       await this.updateRatingsOfContent(contentId, null);
       await session.commitTransaction();
       return true;
@@ -123,35 +121,34 @@ export class ReviewService {
     }
   }
 
-  private getNumberArrayAverage(numberArray: number[]) {
-    return numberArray.reduce((a, b) => a + b) / numberArray.length;
-  }
-
   private async updateRatingsOfContent(
     contentId: number,
     newRating: number | null,
   ) {
     try {
-      const existReviews = await this.reviewModel.find({ contentId }).lean();
+      const existReviews = await this.reviewRepository.fetchReviews({
+        contentId,
+      });
       const newRatingArray = [...existReviews.map((review) => review.rating)];
       if (newRating) newRatingArray.push(newRating);
       const ratingAverage =
         newRatingArray.length > 0
           ? this.getNumberArrayAverage(newRatingArray)
           : 0;
-      await this.campListModel.updateOne(
-        { contentId },
-        { $set: { totalRating: ratingAverage } },
+      await this.campRepository.patchCampAverageRating(
+        contentId,
+        ratingAverage,
       );
     } catch (err) {
       throw new Error(err);
     }
   }
 
+  private getNumberArrayAverage(numberArray: number[]) {
+    return numberArray.reduce((a, b) => a + b) / numberArray.length;
+  }
+
   async getReviewesByMemberId(memberId: string) {
-    return await this.reviewModel
-      .find({ memberId })
-      .sort({ createdAt: -1 })
-      .lean();
+    return await this.reviewRepository.fetchReviews({ memberId });
   }
 }

@@ -169,7 +169,7 @@ export class ArticlesController {
   @Delete('/:articleId/comments/:commentId')
   @UseGuards(JwtAuthGuard)
   async deleteArticleComment(
-    @Param('commentId') commentId: number,
+    @Param('commentId') commentId: string,
     @Request() req: InterceptedRequest,
     @Response() res: Res,
   ) {

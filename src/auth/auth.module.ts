@@ -7,6 +7,7 @@ import { Member, MemberSchema } from 'src/members/member.schema';
 import { ConfigService } from '@nestjs/config';
 import { OptionalAuthGuard } from 'src/auth/optional-auth.interceptor';
 import { AuthStrategy } from 'src/auth/auth.strategy';
+import { MemberRepository } from 'src/members/member.repository';
 @Module({
   imports: [
     JwtModule.register({
@@ -15,19 +16,13 @@ import { AuthStrategy } from 'src/auth/auth.strategy';
     MongooseModule.forFeature([{ name: Member.name, schema: MemberSchema }]),
   ],
   providers: [
-    MemberService,
     AuthService,
     ConfigService,
     JwtService,
     OptionalAuthGuard,
     AuthStrategy,
+    MemberRepository,
   ],
-  exports: [
-    MemberService,
-    AuthService,
-    OptionalAuthGuard,
-    JwtService,
-    ConfigService,
-  ],
+  exports: [AuthService, OptionalAuthGuard, JwtService, ConfigService],
 })
 export class AuthModule {}

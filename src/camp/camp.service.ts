@@ -1,20 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
 import { CampList } from './campSchema';
-import { Model } from 'mongoose';
 import { BookmarkService } from './bookmark/bookmark.service';
 import { ReviewService } from './review/review.service';
+import { CampRepository } from './camp.repository';
 
 @Injectable()
 export class CampService {
   constructor(
-    @InjectModel(CampList.name) private campListModel: Model<CampList>,
     private readonly bookmarkService: BookmarkService,
     private readonly reviewService: ReviewService,
+    private readonly campRepository: CampRepository,
   ) {}
 
   async getCampByContentId(contentId: number, memberId?: string) {
-    const campData = await this.campListModel.findOne({ contentId }).lean();
+    const campData = await this.campRepository.fetchCampByContentId(contentId);
     const reviews =
       await this.reviewService.getReviewsForContentByContentId(contentId);
     const campDataWithBookmarkInfo = await this.addBookmarkToCampByMemberId(

@@ -6,12 +6,12 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Bookmark } from './bookmark.schema';
-import { CampService } from '../camp.service';
+import { CampRepository } from '../camp.repository';
 @Injectable()
-export class WishlistService {
+export class BookmarkWishlistService {
   constructor(
     @InjectModel(Bookmark.name) private bookmarkModel: Model<Bookmark>,
-    private readonly campService: CampService,
+    private readonly campRepository: CampRepository,
   ) {}
   async getBookmarkedCampsByMemberId(memberId: string) {
     try {
@@ -21,7 +21,7 @@ export class WishlistService {
       const campsData = await Promise.all(
         contentIdList.map(
           async (contentId) =>
-            await this.campService.getCampByContentId(contentId, memberId),
+            await this.campRepository.fetchCampByContentId(contentId),
         ),
       );
       return campsData;

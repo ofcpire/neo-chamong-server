@@ -1,30 +1,22 @@
 import { BadGatewayException, Injectable, Logger } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { CampKeyword, CampList } from 'src/camp/campSchema';
 import { searchfields, areas, themes } from 'src/camp/campVariables';
-import { Model } from 'mongoose';
-import { ReviewService } from '../review/review.service';
-import { BookmarkService } from '../bookmark/bookmark.service';
-import { CampService } from '../camp.service';
+import { CampService } from '../camp/camp.service';
+import { CampRepository } from '../camp/camp.repository';
 
 @Injectable()
 export class MainService {
   constructor(
-    @InjectModel(CampList.name) private campListModel: Model<CampList>,
-    @InjectModel(CampKeyword.name) private campKeywordModel: Model<CampKeyword>,
-    private readonly reviewService: ReviewService,
-    private readonly bookmarkService: BookmarkService,
     private readonly campService: CampService,
+    private readonly campRepository: CampRepository,
   ) {}
   private readonly logger = new Logger(MainService.name);
 
-  async getCampByPage(page: number = 1, row: number = 30, memberId: string) {
-    const skip = (page - 1) * row;
-    const campData = await this.campListModel
-      .find({})
-      .skip(skip)
-      .limit(row)
-      .lean();
+  async getCampByPage(page: number = 1, size: number = 30, memberId: string) {
+    const campData = await this.campRepository.fetchCampListByPage(
+      {},
+      page,
+      size,
+    );
 
     const campDataWithIsliked =
       await this.campService.addBookmarkToCampArrayByMemberId(
@@ -38,12 +30,10 @@ export class MainService {
   async getCampByKeywordId(
     keywordId: number = 1,
     page: number,
-    row: number,
+    size: number,
     memberId: string,
   ) {
-    const keywords = await this.campKeywordModel.findOne({
-      keywordId: keywordId,
-    });
+    const keywords = await this.campRepository.fetchCampKeyword(keywordId);
     if (!keywords) return [];
 
     const campData = this.getCampDataBySearch(
@@ -51,7 +41,7 @@ export class MainService {
       null,
       null,
       page,
-      row,
+      size,
       memberId,
     );
     return campData;
@@ -62,12 +52,11 @@ export class MainService {
     areaId: number | null = null,
     themeId: number | null = null,
     page: number = 1,
-    row: number = 30,
+    size: number = 30,
     memberId: string,
   ) {
     try {
       if (themeId) searchKeyword = [...searchKeyword, themes[themeId]];
-      const skip = (page - 1) * row;
       const regexKeywords = searchKeyword.map(
         (keyword) => new RegExp(keyword, 'i'),
       );
@@ -85,12 +74,11 @@ export class MainService {
         };
         queryOption['$and'] = [areaQuery];
       }
-
-      const campData = await this.campListModel
-        .find(queryOption)
-        .skip(skip)
-        .limit(row)
-        .lean();
+      const campData = await this.campRepository.fetchCampListByPage(
+        queryOption,
+        page,
+        size,
+      );
       return await this.campService.addBookmarkToCampArrayByMemberId(
         campData,
         memberId,

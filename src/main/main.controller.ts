@@ -8,11 +8,11 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
-import { MainService } from 'src/camp/main/main.service';
+import { MainService } from 'src/main/main.service';
 import { WrapContentInterceptor } from 'src/common/utils/interceptor/wrap-content.interceptor';
 import { OptionalAuthGuard } from 'src/auth/optional-auth.interceptor';
 import { InterceptedRequest } from 'src/members/members';
-import { CampService } from '../camp.service';
+import { CampService } from '../camp/camp.service';
 
 @Controller('main')
 export class MainController {

@@ -13,11 +13,11 @@ import { Response as Res } from 'express';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from 'src/auth/auth.service';
-import { InterceptedRequest } from '../members';
-import { MypageService } from 'src/members/mypage/mypage.service';
+import { InterceptedRequest } from 'src/members/members';
+import { MypageService } from './mypage.service';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { JsonExtractInterceptor } from 'src/common/utils/interceptor/json-extract.interceptor';
-import { PatchMemberDto } from '../../mypage/dto/patch-member.dto';
+import { PatchMemberDto } from './dto/patch-member.dto';
 
 @Controller('members')
 @UseGuards(JwtAuthGuard)

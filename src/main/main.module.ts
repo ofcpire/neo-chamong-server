@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MainController } from './main.controller';
-import { MainService } from 'src/camp/main/main.service';
+import { MainService } from 'src/main/main.service';
 import {
   CampList,
   CampKeyword,
@@ -9,9 +9,12 @@ import {
   CampKeywordSchema,
 } from 'src/camp/campSchema';
 import { AuthModule } from 'src/auth/auth.module';
-import { BookmarkModule } from '../bookmark/bookmark.module';
-import { ReviewModule } from '../review/review.module';
-import { CampService } from '../camp.service';
+import { BookmarkModule } from '../camp/bookmark/bookmark.module';
+import { ReviewModule } from '../camp/review/review.module';
+import { CampService } from '../camp/camp.service';
+import { MembersModule } from 'src/members/members.module';
+import { CampModule } from '../camp/camp.module';
+import { CampRepository } from '../camp/camp.repository';
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -21,9 +24,11 @@ import { CampService } from '../camp.service';
     AuthModule,
     BookmarkModule,
     ReviewModule,
+    MembersModule,
+    CampModule,
   ],
   controllers: [MainController],
-  providers: [MainService, CampService],
+  providers: [MainService, CampService, CampRepository],
   exports: [MainService],
 })
 export class MainModule {}

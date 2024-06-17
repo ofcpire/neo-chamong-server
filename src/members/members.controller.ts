@@ -84,7 +84,7 @@ export class MembersController {
     const encryptedPassword = await this.authService.passwordEncrypt(
       body.password,
     );
-    const result = await this.authService.createAccount(
+    const result = await this.memberService.createAccount(
       body.nickname,
       body.email,
       encryptedPassword,

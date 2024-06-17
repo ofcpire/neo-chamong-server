@@ -4,14 +4,14 @@ import {
   ExecutionContext,
   Logger,
 } from '@nestjs/common';
-import { MemberService } from 'src/members/member.service';
 import { Request } from 'express';
 import { AuthService } from 'src/auth/auth.service';
+import { MemberRepository } from 'src/members/member.repository';
 
 @Injectable()
 export class OptionalAuthGuard implements CanActivate {
   constructor(
-    private readonly memberService: MemberService,
+    private readonly memberRepository: MemberRepository,
     private readonly authService: AuthService,
   ) {}
 
@@ -25,7 +25,7 @@ export class OptionalAuthGuard implements CanActivate {
           token,
           'authorization',
         );
-        const memberInfo = await this.memberService.getMemberInfoById(
+        const memberInfo = await this.memberRepository.fetchMemberInfoById(
           payload.id,
         );
         if (memberInfo) request.user = memberInfo;

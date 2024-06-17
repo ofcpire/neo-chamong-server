@@ -14,14 +14,14 @@ import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { BookmarkService } from 'src/camp/bookmark/bookmark.service';
 import { InterceptedRequest } from 'src/members/members';
 import { Response as Res } from 'express';
-import { WishlistService } from 'src/camp/bookmark/wishlist.service';
+import { BookmarkWishlistService } from 'src/camp/bookmark/bookmark-wishlist.service';
 import { WrapContentInterceptor } from 'src/common/utils/interceptor/wrap-content.interceptor';
 
 @Controller('bookmark')
 export class BookmarkController {
   constructor(
     private readonly bookmarkService: BookmarkService,
-    private readonly wishlistService: WishlistService,
+    private readonly bookmarkWishlistService: BookmarkWishlistService,
   ) {}
   private readonly logger = new Logger(BookmarkController.name);
 
@@ -30,7 +30,7 @@ export class BookmarkController {
   @UseInterceptors(WrapContentInterceptor)
   async getBookmarkedCamp(@Request() req: InterceptedRequest) {
     this.logger.log('Get /bookmark');
-    return await this.wishlistService.getBookmarkedCampsByMemberId(
+    return await this.bookmarkWishlistService.getBookmarkedCampsByMemberId(
       req.user?.id,
     );
   }

@@ -5,32 +5,21 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { PickPlace } from './pick-place.schema';
 import { CreatePickPlaceDto } from './dto/pick-places.dto';
+import { PickPlaceRepository } from './pick-place.repository';
 
 @Injectable()
 export class PickPlacesService {
-  constructor(
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
-    @InjectModel(PickPlace.name) private pickPlaceModel: Model<PickPlace>,
-  ) {}
+  constructor(private readonly pickPlaceRepository: PickPlaceRepository) {}
   async postPickPlaces(
-    CreatePickPlaceDto: CreatePickPlaceDto,
+    createPickPlaceDto: CreatePickPlaceDto,
     memberId: string,
   ) {
     try {
-      console.log(CreatePickPlaceDto);
-      const newPickPlace = new this.pickPlaceModel({
-        ...CreatePickPlaceDto,
+      return await this.pickPlaceRepository.createNewPickPlace(
+        createPickPlaceDto,
         memberId,
-      });
-      const result = await newPickPlace.save();
-      return result;
+      );
     } catch (err) {
       Logger.error(err);
       throw new InternalServerErrorException();
@@ -38,19 +27,18 @@ export class PickPlacesService {
   }
 
   async patchPickPlaces(
-    CreatePickPlaceDto: CreatePickPlaceDto,
+    createPickPlaceDto: CreatePickPlaceDto,
     myPlaceId: string,
     memberId: string,
   ) {
-    const existPickPlace = await this.pickPlaceModel.findOne({ id: myPlaceId });
+    const existPickPlace =
+      await this.pickPlaceRepository.fetchSinglePickPlaceByMyPlaceId(myPlaceId);
     if (!existPickPlace) throw new NotFoundException();
     if (existPickPlace.memberId !== memberId) throw new UnauthorizedException();
     try {
-      return await this.pickPlaceModel.updateOne(
-        { id: myPlaceId, memberId },
-        {
-          ...CreatePickPlaceDto,
-        },
+      return await this.pickPlaceRepository.patchSinglePickPlace(
+        myPlaceId,
+        createPickPlaceDto,
       );
     } catch (err) {
       Logger.error(err);
@@ -59,11 +47,12 @@ export class PickPlacesService {
   }
 
   async deletePickPlaces(myPlaceId: string, memberId: string) {
-    const existPickPlace = await this.pickPlaceModel.findOne({ id: myPlaceId });
+    const existPickPlace =
+      await this.pickPlaceRepository.fetchSinglePickPlaceByMyPlaceId(myPlaceId);
     if (!existPickPlace) throw new NotFoundException();
     if (existPickPlace.memberId !== memberId) throw new UnauthorizedException();
     try {
-      return await this.pickPlaceModel.deleteOne({ id: myPlaceId, memberId });
+      return await this.pickPlaceRepository.deletePickPlace(myPlaceId);
     } catch (err) {
       Logger.error(err);
       throw new InternalServerErrorException();
@@ -71,10 +60,10 @@ export class PickPlacesService {
   }
 
   async getMyPickPlaces(memberId: string) {
-    return await this.pickPlaceModel.find({ memberId });
+    return await this.pickPlaceRepository.fetchPickPlaces({ memberId });
   }
 
   async getSharedPickPlaces() {
-    return await this.pickPlaceModel.find({ isShared: true });
+    return await this.pickPlaceRepository.fetchPickPlaces({ isShared: true });
   }
 }

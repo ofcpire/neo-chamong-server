@@ -8,16 +8,14 @@ import {
 import { hashSync, genSaltSync, compareSync } from 'bcryptjs';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { InjectModel } from '@nestjs/mongoose';
-import { Member } from 'src/members/member.schema';
-import { Model } from 'mongoose';
+import { MemberRepository } from 'src/members/member.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectModel(Member.name) private memberModel: Model<Member>,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private memberRepository: MemberRepository,
   ) {}
   async passwordEncrypt(password: string): Promise<string> {
     if (
@@ -32,42 +30,13 @@ export class AuthService {
   }
 
   async memberLogin(email: string, password: string) {
-    const memberInfo = await this.memberModel.findOne({
-      email: email,
-    });
+    const memberInfo =
+      await this.memberRepository.fetchMemberInfoWithPasswordByEmail(email);
     if (!memberInfo) throw new NotFoundException();
     if (compareSync(password, memberInfo.password)) {
       memberInfo.password = undefined;
       return memberInfo;
     } else return false;
-  }
-
-  async createAccount(
-    nickname: string,
-    email: string,
-    encryptedPassword: string,
-  ) {
-    if (!nickname || !email || !this.emailValidator(email)) {
-      throw new BadRequestException();
-    }
-    const isMemberExist = await this.memberModel.findOne({
-      email,
-    });
-    if (!isMemberExist) {
-      const memberClass = new this.memberModel({
-        email,
-        nickname,
-        password: encryptedPassword,
-        profileImg: null,
-        about: '자기소개를 입력해주세요.',
-        carName: '',
-        oilInfo: null,
-      });
-      memberClass.save().catch((err) => {
-        Logger.log('Error : ' + err);
-      });
-      return memberClass.email;
-    } else throw new ConflictException();
   }
 
   async refreshTokenSign(id: string) {
@@ -99,12 +68,5 @@ export class AuthService {
     });
     if (result.type !== type) throw new Error('type mismatch');
     return result;
-  }
-
-  async emailValidator(email: string) {
-    const emailRegex = new RegExp(
-      "/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:.[a-zA-Z0-9-]+)*$/",
-    );
-    return emailRegex.test(email);
   }
 }

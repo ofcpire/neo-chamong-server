@@ -7,50 +7,34 @@ import {
   NotFoundException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import {
-  Article,
-  ArticleComment,
-  ArticleLike,
-} from 'src/articles/article.schema';
+import { Connection } from 'mongoose';
+import { Article } from 'src/articles/article.schema';
 import { CreateArticleDto } from 'src/articles/dto/articles.dto';
-import { MemberInfoService } from '../members/member-info.service';
+import { MemberService } from '../members/member.service';
+import { ArticlesRepository } from './articles.repository';
+import { InjectConnection } from '@nestjs/mongoose';
 
 @Injectable()
 export class ArticlesService {
   constructor(
-    @InjectModel(Article.name) private articleModel: Model<Article>,
-    @InjectModel(ArticleLike.name) private articleLikeModel: Model<ArticleLike>,
-    @InjectModel(ArticleComment.name)
-    private articleCommentModel: Model<ArticleComment>,
-    private memberInfoService: MemberInfoService,
+    private readonly memberService: MemberService,
+    private readonly articlesRepository: ArticlesRepository,
+    @InjectConnection() private readonly connection: Connection,
   ) {}
+
   async getArticlesByPageAndKeyword(
     page: number = 1,
     size: number = 15,
     keyword: string | undefined,
     memberId?: string,
   ) {
-    if (page <= 0) page = 1;
-    const skip = (page - 1) * size;
-    const totalElements = await this.articleModel.countDocuments({
-      public: { $ne: false },
-    });
-    const query = keyword
-      ? {
-          $or: [
-            { title: { $regex: keyword, $options: 'i' } },
-            { content: { $regex: keyword, $options: 'i' } },
-          ],
-        }
-      : {};
-    const articleData = await this.articleModel
-      .find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(size)
-      .lean();
+    const totalElements =
+      await this.articlesRepository.fetchArticleTotalElements();
+    const articleData = await this.articlesRepository.fetchArticleByPage(
+      page,
+      size,
+      keyword,
+    );
     const articleDataWithIsLiked = await this.addMemberInfoToAnything(
       await this.addIsLikeToArticles(articleData, memberId),
     );
@@ -60,27 +44,22 @@ export class ArticlesService {
     };
   }
 
-  private async getArticleById(articleId: string, lean: boolean = false) {
-    if (lean)
-      return await this.articleModel
-        .findOne({ id: articleId })
-        .lean({ virtuals: true });
-    else
-      return await this.articleModel.findOne({
-        id: articleId,
-      });
-  }
-
   async getArticleWithDetailsById(
     articleId: string,
     memberId: string | null = null,
   ) {
-    const articleDocument = await this.getArticleById(articleId);
+    const articleDocument =
+      await this.articlesRepository.fetchSingleArticleByArticleId(articleId);
     articleDocument.viewCnt += 1;
     articleDocument.save();
     const articleData = articleDocument.toObject();
-    const articleLikes = await this.articleLikeModel.find({ articleId }).lean();
-    const memberInfo = await this.memberInfoService.getMemberInfoForArticleById(
+    const articleLikes = await this.articlesRepository.fetchArticleLikes(
+      {
+        articleId,
+      },
+      true,
+    );
+    const memberInfo = await this.memberService.getMemberInfoForArticleById(
       articleData.memberId,
     );
     const isLiked = memberId
@@ -104,10 +83,12 @@ export class ArticlesService {
     else {
       return await Promise.all(
         articleArray.map(async (article) => {
-          const like = await this.articleLikeModel.findOne({
+          const query = {
             articleId: article.id,
             memberId,
-          });
+          };
+          const like =
+            await this.articlesRepository.fetchSingleArticleLike(query);
           return {
             ...article,
             isLiked: !!like,
@@ -117,23 +98,11 @@ export class ArticlesService {
     }
   }
 
-  private async getCommentsByArticleId(articleId: string) {
-    const comments = await this.articleCommentModel
-      .find({
-        articleId,
-      })
-      .sort({ createdAt: 1 })
-      .lean();
-    return comments;
-  }
-
   private async addMemberInfoToAnything(array: any[]) {
     const memberIdList = Array.from(new Set(array.map((e) => e.memberId)));
     const memberInfos = await Promise.all(
       memberIdList.map(async (memberId) => {
-        return await this.memberInfoService.getMemberInfoForArticleById(
-          memberId,
-        );
+        return await this.memberService.getMemberInfoForArticleById(memberId);
       }),
     );
     const arrayWithMemberInfo = array.map((e) => {
@@ -149,64 +118,62 @@ export class ArticlesService {
   }
 
   private async getCommentsWithMemberInfo(articleId: string) {
-    const comments = await this.getCommentsByArticleId(articleId);
+    const comments =
+      await this.articlesRepository.fetchArticleCommentsByArticleId(articleId);
     const commentsWithMemberInfo = await this.addMemberInfoToAnything(comments);
     return commentsWithMemberInfo;
   }
 
   async postArticle(CreateArticleDto: CreateArticleDto, memberId: string) {
     try {
-      const createdArticle = new this.articleModel({
-        ...CreateArticleDto,
-        imgName: CreateArticleDto.imgName,
+      return await this.articlesRepository.createNewArticle(
+        CreateArticleDto,
         memberId,
-      });
-      await createdArticle.save();
-      return createdArticle.id;
+      );
     } catch (err) {
       throw new BadRequestException();
     }
   }
 
   async patchArticle(
-    CreateArticleDto: CreateArticleDto,
+    createArticleDto: CreateArticleDto,
     memberId: string,
     articleId: string,
   ) {
-    const existArticle = await this.getArticleById(articleId);
+    const existArticle =
+      await this.articlesRepository.fetchSingleArticleByArticleId(articleId);
     if (existArticle.memberId !== memberId) throw new UnauthorizedException();
-    existArticle.title = CreateArticleDto.title;
-    existArticle.content = CreateArticleDto.content;
-    await existArticle.save();
-    return true;
+    return await this.articlesRepository.patchSingleArticleByDocument(
+      createArticleDto,
+      articleId,
+    );
   }
 
   async getPopularArticles() {
-    return await this.articleModel.find({}).sort({ likeCnt: -1 }).limit(3);
+    return await this.articlesRepository.fetchPopularArticles(3);
   }
 
   async deleteArticles(memberId: string, articleId: string) {
-    const articleData = await this.getArticleById(articleId);
+    const articleData =
+      await this.articlesRepository.fetchSingleArticleByArticleId(articleId);
     if (memberId === articleData.memberId) {
-      articleData.public = false;
-      await articleData.save();
-    }
+      return await this.articlesRepository.unpublicSingleArticle(articleId);
+    } else throw new UnauthorizedException();
   }
 
   async postComment(articleId: string, memberId: string, content: string) {
-    const session = await this.articleCommentModel.db.startSession();
+    const session = await this.connection.startSession();
     session.startTransaction();
-    const newArticleComment = new this.articleCommentModel({
-      articleId,
-      memberId,
-      content,
-    });
     try {
-      await this.articleModel.updateOne(
-        { id: articleId },
-        { $inc: { commentCnt: 1 } },
+      await this.articlesRepository.createNewArticleComment(
+        articleId,
+        memberId,
+        content,
       );
-      await newArticleComment.save();
+      await this.articlesRepository.increaseOrDecreaseArticleCommentCnt(
+        articleId,
+        true,
+      );
       await session.commitTransaction();
       return true;
     } catch (err) {
@@ -218,18 +185,17 @@ export class ArticlesService {
     }
   }
 
-  async deleteComment(commentId: number, memberId: string) {
-    const comment = await this.articleCommentModel.findOne({ id: commentId });
-    if (comment.memberId === memberId) {
-      comment.public = false;
-    } else throw new UnauthorizedException();
-    const session = await this.articleCommentModel.startSession();
+  async deleteComment(commentId: string, memberId: string) {
+    const comment =
+      await this.articlesRepository.fetchSingleArticleComments(commentId);
+    if (comment.memberId !== memberId) throw new UnauthorizedException();
+    const session = await this.connection.startSession();
     session.startTransaction();
     try {
-      await comment.save();
-      await this.articleModel.updateOne(
-        { id: comment.articleId },
-        { $inc: { commentCnt: -1 } },
+      await this.articlesRepository.unpublicSingleComment(commentId);
+      await this.articlesRepository.increaseOrDecreaseArticleCommentCnt(
+        comment.articleId,
+        false,
       );
       await session.commitTransaction();
     } catch (err) {
@@ -243,23 +209,19 @@ export class ArticlesService {
 
   async likeArticle(articleId: string, memberId: string) {
     if (
-      await this.articleLikeModel.findOne({
+      this.articlesRepository.fetchArticleLikes({
         articleId,
         memberId,
       })
     )
       throw new ConflictException();
-    const session = await this.articleLikeModel.db.startSession();
+    const session = await this.connection.startSession();
     session.startTransaction();
     try {
-      const newLikeArticle = new this.articleLikeModel({
+      await this.articlesRepository.createArticleLike(articleId, memberId);
+      await this.articlesRepository.increaseOrDecreaseArticleLikeCnt(
         articleId,
-        memberId,
-      });
-      newLikeArticle.save();
-      await this.articleModel.updateOne(
-        { id: articleId },
-        { $inc: { likeCnt: 1 } },
+        true,
       );
       await session.commitTransaction();
       return true;
@@ -273,23 +235,20 @@ export class ArticlesService {
   }
 
   async dislikeArticle(articleId: string, memberId: string) {
-    const existLike = await this.articleLikeModel.findOne({
+    const existLike = await this.articlesRepository.fetchArticleLikes({
       articleId,
       memberId,
     });
     if (!existLike) {
       throw new NotFoundException();
     }
-    const session = await this.articleLikeModel.db.startSession();
+    const session = await this.connection.startSession();
     session.startTransaction();
     try {
-      await this.articleLikeModel.deleteOne({
+      await this.articlesRepository.deleteArticleLike(articleId, memberId);
+      await this.articlesRepository.increaseOrDecreaseArticleLikeCnt(
         articleId,
-        memberId,
-      });
-      await this.articleModel.updateOne(
-        { id: articleId },
-        { $inc: { likeCnt: -1 } },
+        false,
       );
       await session.commitTransaction();
       return true;
@@ -303,25 +262,24 @@ export class ArticlesService {
   }
 
   async getArticlesByMemberId(memberId: string) {
-    const articles = await this.articleModel
-      .find({ memberId })
-      .sort({ createdAt: -1 })
-      .lean();
+    const articles =
+      await this.articlesRepository.fetchArticlesByMemberId(memberId);
     return await this.addIsLikeToArticles(articles, memberId);
   }
 
   async getCommentedArticlesByMemberId(memberId: string) {
     try {
-      const articleComments = await this.articleCommentModel
-        .find({ memberId })
-        .sort({ createdAt: -1 })
-        .lean();
+      const articleComments =
+        await this.articlesRepository.fetchArticleCommentsByMemberId(memberId);
       const articleIdList = Array.from(
         new Set(articleComments.map((comment) => comment.articleId)),
       ) as string[];
       const articleData = await Promise.all(
         articleIdList.map(async (articleId) => {
-          return await this.getArticleById(articleId, true);
+          return await this.articlesRepository.fetchSingleArticleByArticleId(
+            articleId,
+            true,
+          );
         }),
       );
       return await this.addIsLikeToArticles(
@@ -336,14 +294,14 @@ export class ArticlesService {
   async getLikedArticlesByMemberId(memberId: string) {
     try {
       const articleIdList = (
-        await this.articleLikeModel
-          .find({ memberId })
-          .sort({ createdAt: -1 })
-          .lean()
+        await this.articlesRepository.fetchArticleLikesByMemberId(memberId)
       ).map((articleLike) => articleLike.articleId);
       const articleData = await Promise.all(
         articleIdList.map(async (articleId) => {
-          return await this.getArticleById(articleId, true);
+          return await this.articlesRepository.fetchSingleArticleByArticleId(
+            articleId,
+            true,
+          );
         }),
       );
       return await this.addIsLikeToArticles(

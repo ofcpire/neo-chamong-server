@@ -5,6 +5,8 @@ import { MembersModule } from './members/members.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ArticlesModule } from './articles/articles.module';
 import { PlaceModule } from './place/place.module';
+import { MypageModule } from './mypage/mypage.module';
+import { MainModule } from './main/main.module';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { PlaceModule } from './place/place.module';
     CampModule,
     ArticlesModule,
     PlaceModule,
+    MypageModule,
+    MainModule,
     MongooseModule.forRoot(process.env.MONGODB_URL),
   ],
 })

@@ -3,6 +3,7 @@ import { MembersController } from 'src/members/members.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Member, MemberSchema } from './member.schema';
 import { MemberService } from './member.service';
+import { MemberConfigService } from './member-config.service';
 import { MemberRepository } from './member.repository';
 import { AuthModule } from 'src/auth/auth.module';
 
@@ -12,9 +13,10 @@ import { AuthModule } from 'src/auth/auth.module';
     AuthModule,
   ],
   controllers: [MembersController],
-  providers: [MemberService, MemberRepository],
+  providers: [MemberService, MemberConfigService, MemberRepository],
   exports: [
     MemberService,
+    MemberConfigService,
     MongooseModule.forFeature([{ name: Member.name, schema: MemberSchema }]),
     MemberRepository,
   ],

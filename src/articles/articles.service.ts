@@ -11,6 +11,7 @@ import { Connection } from 'mongoose';
 import { Article } from 'src/articles/article.schema';
 import { CreateArticleDto } from 'src/articles/dto/articles.dto';
 import { MemberService } from '../members/member.service';
+import { ArticleConfigService } from './article-config.service';
 import { ArticlesRepository } from './articles.repository';
 import { InjectConnection } from '@nestjs/mongoose';
 
@@ -18,9 +19,12 @@ import { InjectConnection } from '@nestjs/mongoose';
 export class ArticlesService {
   constructor(
     private readonly memberService: MemberService,
+    private readonly articleConfigService: ArticleConfigService,
     private readonly articlesRepository: ArticlesRepository,
     @InjectConnection() private readonly connection: Connection,
-  ) {}
+  ) {
+    this.articleConfigService.schemaConfiguration();
+  }
 
   async getArticlesByPageAndKeyword(
     page: number = 1,

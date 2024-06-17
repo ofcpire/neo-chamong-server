@@ -11,6 +11,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ArticlesController } from 'src/articles/articles.controller';
 import { ArticlesService } from 'src/articles/articles.service';
 import { AuthModule } from '../auth/auth.module';
+import { ArticleConfigService } from './article-config.service';
 import { MembersModule } from 'src/members/members.module';
 import { ArticlesRepository } from './articles.repository';
 
@@ -25,9 +26,10 @@ import { ArticlesRepository } from './articles.repository';
     MembersModule,
   ],
   controllers: [ArticlesController],
-  providers: [ArticlesService, ArticlesRepository],
+  providers: [ArticlesService, ArticlesRepository, ArticleConfigService],
   exports: [
     ArticlesService,
+    ArticleConfigService,
     ArticlesRepository,
     MongooseModule.forFeature([
       { name: Article.name, schema: ArticleSchema },

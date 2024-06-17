@@ -7,10 +7,16 @@ import {
 } from '@nestjs/common';
 import { CreatePickPlaceDto } from './dto/pick-places.dto';
 import { PickPlaceRepository } from './pick-place.repository';
+import { PickPlacesConfigService } from './pick-places-config.service';
 
 @Injectable()
 export class PickPlacesService {
-  constructor(private readonly pickPlaceRepository: PickPlaceRepository) {}
+  constructor(
+    private readonly pickPlaceRepository: PickPlaceRepository,
+    private readonly pickPlaceConfigService: PickPlacesConfigService,
+  ) {
+    this.pickPlaceConfigService.schemaConfiguration();
+  }
   async postPickPlaces(
     createPickPlaceDto: CreatePickPlaceDto,
     memberId: string,

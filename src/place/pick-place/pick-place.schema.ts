@@ -13,6 +13,9 @@ export class PickPlace extends Document {
   @Prop()
   memo: string;
 
+  @Prop({ default: null })
+  imgName: string;
+
   @Prop({ default: [] })
   keywords: string[];
 

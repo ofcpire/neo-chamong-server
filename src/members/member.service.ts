@@ -5,11 +5,17 @@ import {
   BadRequestException,
   ConflictException,
 } from '@nestjs/common';
+import { MemberConfigService } from './member-config.service';
 import { MemberRepository } from './member.repository';
 
 @Injectable()
 export class MemberService {
-  constructor(private memberRepository: MemberRepository) {}
+  constructor(
+    private memberConfigService: MemberConfigService,
+    private memberRepository: MemberRepository,
+  ) {
+    this.memberConfigService.schemaConfiguration();
+  }
 
   async getMemberInfoById(id: string) {
     const memberInfo = await this.memberRepository.fetchMemberInfoById(id);

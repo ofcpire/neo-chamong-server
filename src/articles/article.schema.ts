@@ -1,8 +1,14 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { v4 as uuid } from 'uuid';
+import * as _ from 'mongoose-lean-virtuals';
+import { SchemaUtilHelper } from 'src/common/utils/utils/schema-util.helper';
 
-@Schema({ timestamps: true })
+@Schema({
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true },
+})
 export class Article extends Document {
   @Prop({ required: true, default: uuid })
   id: string;
@@ -14,7 +20,7 @@ export class Article extends Document {
   content: string;
 
   @Prop()
-  articleImg: string;
+  imgName: string;
 
   @Prop({ required: true })
   memberId: string;
@@ -36,14 +42,11 @@ export class Article extends Document {
 
   @Prop({ required: true, default: true })
   public: boolean;
+
+  readonly articleImg: string;
 }
 
 export const ArticleSchema = SchemaFactory.createForClass(Article);
-
-ArticleSchema.pre(['find', 'findOne'], function (next) {
-  this.where({ public: true });
-  next();
-});
 
 @Schema({ timestamps: true })
 export class ArticleComment extends Document {

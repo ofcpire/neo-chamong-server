@@ -1,8 +1,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { v4 as uuid } from 'uuid';
+import { config } from 'dotenv';
+config();
+const imgBaseUrl = process.env.IMG_BASE_URL;
 
-@Schema({ timestamps: true })
+@Schema({
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true },
+})
 export class Member extends Document {
   @Prop({ default: uuid, unique: true })
   id: string;
@@ -16,8 +23,8 @@ export class Member extends Document {
   @Prop({ required: true })
   password: string;
 
-  @Prop()
-  profileImg: string;
+  @Prop({ default: 'default_profile_img.png' })
+  imgName: string;
 
   @Prop({ default: '자기 소개를 입력해주세요.' })
   about: string;
@@ -33,6 +40,13 @@ export class Member extends Document {
 
   @Prop({ type: Date })
   updatedAt: Date;
+
+  readonly profileImg: string;
 }
 
 export const MemberSchema = SchemaFactory.createForClass(Member);
+
+MemberSchema.virtual('profileImg').get(function (this: Member) {
+  if (this.imgName) return `${imgBaseUrl}/${this.imgName}`;
+  else return null;
+});

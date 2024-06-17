@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { PickPlace, PickPlaceSchema } from './pick-place.schema';
 import { AuthModule } from 'src/auth/auth.module';
 import { PickPlaceRepository } from './pick-place.repository';
+import { PickPlacesConfigService } from './pick-places-config.service';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { PickPlaceRepository } from './pick-place.repository';
     AuthModule,
   ],
   controllers: [PickPlaceController],
-  providers: [PickPlacesService, PickPlaceRepository],
-  exports: [PickPlacesService, PickPlaceRepository],
+  providers: [PickPlacesService, PickPlaceRepository, PickPlacesConfigService],
+  exports: [PickPlacesService, PickPlaceRepository, PickPlacesConfigService],
 })
 export class PickPlaceModule {}

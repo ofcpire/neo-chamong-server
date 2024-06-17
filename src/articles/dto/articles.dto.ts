@@ -1,4 +1,4 @@
-import { IsString, MaxLength } from 'class-validator';
+import { IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class CreateArticleDto {
   @IsString()
@@ -7,6 +7,9 @@ export class CreateArticleDto {
 
   @IsString()
   content: string;
+
+  @IsOptional()
+  imgName: string | null;
 }
 
 export class CreateArticleCommentDto {

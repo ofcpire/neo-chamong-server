@@ -32,8 +32,7 @@ export class BookmarkService {
       memberId,
     });
     if (!existBookmark) throw new NotFoundException();
-    const result = await this.bookmarkModel.deleteOne({ bookmarkId, memberId });
-    console.log(result);
+    return await this.bookmarkModel.deleteOne({ bookmarkId, memberId });
   }
 
   async getBookmarkByContentIdAndMemberId(contentId: number, memberId: string) {

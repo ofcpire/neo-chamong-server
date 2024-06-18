@@ -10,6 +10,7 @@ import {
   Headers,
   UseGuards,
   UseInterceptors,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Response as Res } from 'express';
 import { AuthService } from 'src/auth/auth.service';
@@ -22,12 +23,6 @@ import { InterceptedRequest } from './members';
 import { PatchMemberDto } from './dto/patch-member.dto';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { LoginMemberDto } from './dto/login-member.dto';
-
-interface LoginBodyType {
-  nickname: string;
-  email: string;
-  password: string;
-}
 
 @Controller('members')
 export class MembersController {
@@ -42,7 +37,7 @@ export class MembersController {
     this.logger.log(`members/login`);
     const memberInfo = await this.authService.memberLogin(loginMemberDto);
     if (!memberInfo) {
-      res.status(404).send('unknown email');
+      throw new UnauthorizedException();
     } else {
       const accessToken = await this.authService.accessTokenSign(memberInfo.id);
       const refreshToken = await this.authService.refreshTokenSign(

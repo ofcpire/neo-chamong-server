@@ -16,7 +16,9 @@ export class MemberRepository {
         .findOne({
           email,
         })
-        .lean();
+        .lean({
+          virtuals: true,
+        });
       return memberInfo;
     } catch (err) {
       Logger.error(err);
@@ -29,7 +31,9 @@ export class MemberRepository {
       .findOne({
         id,
       })
-      .lean();
+      .lean({
+        virtuals: true,
+      });
     if (!memberInfo) throw new NotFoundException();
     else {
       memberInfo.password = undefined;

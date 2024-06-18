@@ -1,6 +1,7 @@
 import { Schema, SchemaFactory, Prop } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { v4 as uuid } from 'uuid';
+import * as _ from 'mongoose-lean-virtuals';
 
 @Schema({ timestamps: true })
 export class PickPlace extends Document {
@@ -39,3 +40,5 @@ export class PickPlace extends Document {
 }
 
 export const PickPlaceSchema = SchemaFactory.createForClass(PickPlace);
+
+PickPlaceSchema.plugin(_.mongooseLeanVirtuals);

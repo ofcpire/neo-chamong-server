@@ -32,7 +32,7 @@ export class PickPlaceRepository {
     return await this.pickPlaceModel.updateOne(
       { id },
       {
-        ...createPickPlaceDto,
+        $set: { ...createPickPlaceDto },
       },
     );
   }
@@ -42,6 +42,8 @@ export class PickPlaceRepository {
   }
 
   async fetchPickPlaces(query: { memberId?: string; isShared?: boolean }) {
-    return await this.pickPlaceModel.find(query);
+    return await this.pickPlaceModel.find(query).lean({
+      virtuals: true,
+    });
   }
 }

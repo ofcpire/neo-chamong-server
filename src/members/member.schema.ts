@@ -1,9 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { v4 as uuid } from 'uuid';
-import { config } from 'dotenv';
-config();
-const imgBaseUrl = process.env.IMG_BASE_URL;
+import * as _ from 'mongoose-lean-virtuals';
 
 @Schema({
   timestamps: true,
@@ -46,7 +44,4 @@ export class Member extends Document {
 
 export const MemberSchema = SchemaFactory.createForClass(Member);
 
-MemberSchema.virtual('profileImg').get(function (this: Member) {
-  if (this.imgName) return `${imgBaseUrl}/${this.imgName}`;
-  else return null;
-});
+MemberSchema.plugin(_.mongooseLeanVirtuals);

@@ -1,6 +1,7 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { v4 as uuid } from 'uuid';
+import * as _ from 'mongoose-lean-virtuals';
 
 @Schema({
   timestamps: true,
@@ -45,6 +46,8 @@ export class Article extends Document {
 }
 
 export const ArticleSchema = SchemaFactory.createForClass(Article);
+
+ArticleSchema.plugin(_.mongooseLeanVirtuals);
 
 @Schema({ timestamps: true })
 export class ArticleComment extends Document {

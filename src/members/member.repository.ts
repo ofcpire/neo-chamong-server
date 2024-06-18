@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Member } from './member.schema';
 import { NotFoundException } from '@nestjs/common';
+import { PatchMemberDto } from 'src/members/dto/patch-member.dto';
 
 @Injectable()
 export class MemberRepository {
@@ -59,5 +60,14 @@ export class MemberRepository {
       Logger.error(err);
       throw new Error(err);
     }
+  }
+
+  async patchMember(patchMemberDto: PatchMemberDto, memberId: string) {
+    return await this.memberModel.updateOne(
+      { id: memberId },
+      {
+        $set: { ...PatchMemberDto },
+      },
+    );
   }
 }

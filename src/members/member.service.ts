@@ -4,9 +4,11 @@ import {
   NotFoundException,
   BadRequestException,
   ConflictException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { MemberConfigService } from './member-config.service';
 import { MemberRepository } from './member.repository';
+import { PatchMemberDto } from 'src/members/dto/patch-member.dto';
 
 @Injectable()
 export class MemberService {
@@ -40,7 +42,7 @@ export class MemberService {
     email: string,
     encryptedPassword: string,
   ) {
-    if (!nickname || !email || !this.emailValidator(email)) {
+    if (!nickname || !email) {
       throw new BadRequestException();
     }
     const isMemberExist =
@@ -55,10 +57,12 @@ export class MemberService {
     } else throw new ConflictException();
   }
 
-  private emailValidator(email: string) {
-    const emailRegex = new RegExp(
-      "/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:.[a-zA-Z0-9-]+)*$/",
-    );
-    return emailRegex.test(email);
+  async patchMemberProfile(patchMemberDto: PatchMemberDto, memberId) {
+    try {
+      return await this.memberRepository.patchMember(patchMemberDto, memberId);
+    } catch (err) {
+      Logger.error(err);
+      throw new InternalServerErrorException();
+    }
   }
 }

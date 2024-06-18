@@ -9,6 +9,7 @@ import { hashSync, genSaltSync, compareSync } from 'bcryptjs';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { MemberRepository } from 'src/members/member.repository';
+import { LoginMemberDto } from 'src/members/dto/login-member.dto';
 
 @Injectable()
 export class AuthService {
@@ -29,11 +30,13 @@ export class AuthService {
     return hashSync(password, salt);
   }
 
-  async memberLogin(email: string, password: string) {
+  async memberLogin(loginMemberDto: LoginMemberDto) {
     const memberInfo =
-      await this.memberRepository.fetchMemberInfoWithPasswordByEmail(email);
+      await this.memberRepository.fetchMemberInfoWithPasswordByEmail(
+        loginMemberDto.email,
+      );
     if (!memberInfo) throw new NotFoundException();
-    if (compareSync(password, memberInfo.password)) {
+    if (compareSync(loginMemberDto.password, memberInfo.password)) {
       memberInfo.password = undefined;
       return memberInfo;
     } else return false;

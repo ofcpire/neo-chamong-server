@@ -17,6 +17,9 @@ export class PatchMemberDto {
   })
   about: string;
 
+  @IsOptional()
+  imgName: string | null;
+
   @IsString()
   @MaxLength(20, {
     message: '차량 이름이 너무 깁니다.',

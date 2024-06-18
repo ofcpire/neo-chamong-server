@@ -19,6 +19,7 @@ import { PickPlacesService } from 'src/place/pick-places/pick-places.service';
 import { InterceptedRequest } from 'src/members/members';
 import { JsonExtractInterceptor } from 'src/common/utils/interceptor/json-extract.interceptor';
 import { CreatePickPlaceDto } from './dto/pick-places.dto';
+import { ImageExtractInterceptor } from 'src/common/utils/interceptor/image-extract.interceptor';
 
 @Controller('pick-places')
 @UseGuards(JwtAuthGuard)
@@ -28,7 +29,11 @@ export class PickPlaceController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(AnyFilesInterceptor(), JsonExtractInterceptor)
+  @UseInterceptors(
+    AnyFilesInterceptor(),
+    JsonExtractInterceptor,
+    ImageExtractInterceptor,
+  )
   async postPickPlaces(
     @Response() res: Res,
     @Request() req: InterceptedRequest,
@@ -43,7 +48,11 @@ export class PickPlaceController {
 
   @Patch('/:myPlaceId')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(AnyFilesInterceptor(), JsonExtractInterceptor)
+  @UseInterceptors(
+    AnyFilesInterceptor(),
+    JsonExtractInterceptor,
+    ImageExtractInterceptor,
+  )
   async patchPickPlaces(
     @Response() res: Res,
     @Param('myPlaceId') myPlaceId: string,

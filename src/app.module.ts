@@ -7,6 +7,7 @@ import { ArticlesModule } from './articles/articles.module';
 import { PlaceModule } from './place/place.module';
 import { MypageModule } from './mypage/mypage.module';
 import { MainModule } from './main/main.module';
+import { ImageModule } from './image/image.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { MainModule } from './main/main.module';
     PlaceModule,
     MypageModule,
     MainModule,
+    ImageModule,
     MongooseModule.forRoot(process.env.MONGODB_URL),
   ],
 })

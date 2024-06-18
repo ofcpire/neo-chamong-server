@@ -54,8 +54,7 @@ export class ArticlesService {
   ) {
     const articleDocument =
       await this.articlesRepository.fetchSingleArticleByArticleId(articleId);
-    articleDocument.viewCnt += 1;
-    articleDocument.save();
+    await this.articlesRepository.increaseArticleViewCnt(articleId);
     const articleData = articleDocument.toObject();
     const articleLikes = await this.articlesRepository.fetchArticleLikes(
       {

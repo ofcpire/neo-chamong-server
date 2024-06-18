@@ -1,8 +1,6 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { v4 as uuid } from 'uuid';
-import * as _ from 'mongoose-lean-virtuals';
-import { SchemaUtilHelper } from 'src/common/utils/utils/schema-util.helper';
 
 @Schema({
   timestamps: true,
@@ -74,11 +72,6 @@ export class ArticleComment extends Document {
 
 export const ArticleCommentSchema =
   SchemaFactory.createForClass(ArticleComment);
-
-ArticleCommentSchema.pre(['find', 'findOne'], function (next) {
-  this.where({ public: true });
-  next();
-});
 
 @Schema({ timestamps: true })
 export class ArticleLike extends Document {

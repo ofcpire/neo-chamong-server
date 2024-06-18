@@ -57,7 +57,7 @@ export class MemberService {
     } else throw new ConflictException();
   }
 
-  async patchMemberProfile(patchMemberDto: PatchMemberDto, memberId) {
+  async patchMemberProfile(patchMemberDto: PatchMemberDto, memberId: string) {
     try {
       return await this.memberRepository.patchMember(patchMemberDto, memberId);
     } catch (err) {

@@ -66,7 +66,7 @@ export class MemberRepository {
     return await this.memberModel.updateOne(
       { id: memberId },
       {
-        $set: { ...PatchMemberDto },
+        $set: { ...patchMemberDto },
       },
     );
   }

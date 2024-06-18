@@ -15,7 +15,7 @@ export class Member extends Document {
   @Prop({ required: true, unique: true })
   email: string;
 
-  @Prop({ required: true, default: '차몽인' })
+  @Prop({ required: true, unique: true })
   nickname: string;
 
   @Prop({ required: true })

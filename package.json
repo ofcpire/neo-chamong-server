@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build",
+    "build": "nest build && cross-env npm run init-env && cross-env npm run init-img",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -17,7 +17,9 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "init-env": "cross-env cp -a .env ./dist",
+    "init-img": "cross-env mkdir -p ./dist/public/image && cross-env cp ./public/default_profile_img.png ./dist/public/image"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -31,6 +33,7 @@
     "bcryptjs": "^2.4.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
+    "cross-env": "^7.0.3",
     "dotenv": "^16.4.5",
     "form-data": "^4.0.0",
     "mongoose": "^8.4.0",

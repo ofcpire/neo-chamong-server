@@ -38,5 +38,5 @@ lerna-debug.log*
 .env
 .env.local
 
-#local
-/image
+#dev
+/public/image

@@ -212,7 +212,7 @@ export class ArticlesService {
 
   async likeArticle(articleId: string, memberId: string) {
     if (
-      this.articlesRepository.fetchArticleLikes({
+      this.articlesRepository.fetchSingleArticleLike({
         articleId,
         memberId,
       })

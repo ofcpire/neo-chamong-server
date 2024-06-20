@@ -6,10 +6,10 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build && cross-env npm run init-env && cross-env npm run init-img",
+    "build": "cross-env NODE_ENV=production nest build && cross-env npm run init-env && cross-env npm run init-img",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
-    "start:dev": "nest start --watch",
+    "start": "cross-env NODE_ENV=development nest start",
+    "start:dev": "cross-env NODE_ENV=development nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
@@ -19,7 +19,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "init-env": "cross-env cp -a .env ./dist",
-    "init-img": "cross-env mkdir -p ./dist/public/image && cross-env cp ./public/default_profile_img.png ./dist/public/image"
+    "init-img": "cross-env mkdir -p ./public/image && cross-env cp ./public/init/default_profile_img.png ./public/image"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",

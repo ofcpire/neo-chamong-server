@@ -9,11 +9,12 @@ import {
 import { Observable } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 import { BadRequestException } from '@nestjs/common';
-import { join } from 'path';
 import * as fs from 'fs';
+import { ImageHelper } from '../helper/image.helper';
 
 @Injectable()
 export class ImageExtractInterceptor implements NestInterceptor {
+  constructor(private readonly imageHelper: ImageHelper) {}
   async intercept(
     context: ExecutionContext,
     call: CallHandler,
@@ -30,7 +31,7 @@ export class ImageExtractInterceptor implements NestInterceptor {
         throw new BadRequestException('Too big image');
 
       const imageName = 'image-' + uuid() + '.' + imageFile.originalname;
-      const newPath = join(process.cwd(), 'public', 'image', imageName);
+      const newPath = this.imageHelper.joinImagePath(imageName);
       try {
         fs.writeFileSync(newPath, imageFile.buffer, {});
         req.body.imgName = imageName;

@@ -6,6 +6,7 @@ import { PickPlace, PickPlaceSchema } from './pick-places.schema';
 import { AuthModule } from 'src/auth/auth.module';
 import { PickPlaceRepository } from './pick-places.repository';
 import { PickPlacesConfigService } from './pick-places-config.service';
+import { HelperModule } from 'src/common/helper/helper.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { PickPlacesConfigService } from './pick-places-config.service';
       { name: PickPlace.name, schema: PickPlaceSchema },
     ]),
     AuthModule,
+    HelperModule,
   ],
   controllers: [PickPlaceController],
   providers: [PickPlacesService, PickPlaceRepository, PickPlacesConfigService],

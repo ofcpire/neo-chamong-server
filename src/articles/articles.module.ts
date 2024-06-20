@@ -14,6 +14,7 @@ import { AuthModule } from '../auth/auth.module';
 import { ArticleConfigService } from './article-config.service';
 import { MembersModule } from 'src/members/members.module';
 import { ArticlesRepository } from './articles.repository';
+import { HelperModule } from 'src/common/helper/helper.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ArticlesRepository } from './articles.repository';
     ]),
     AuthModule,
     MembersModule,
+    HelperModule,
   ],
   controllers: [ArticlesController],
   providers: [ArticlesService, ArticlesRepository, ArticleConfigService],

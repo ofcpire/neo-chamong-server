@@ -17,9 +17,9 @@ import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { PickPlacesService } from 'src/place/pick-places/pick-places.service';
 import { InterceptedRequest } from 'src/members/members';
-import { JsonExtractInterceptor } from 'src/common/utils/interceptor/json-extract.interceptor';
+import { JsonExtractInterceptor } from 'src/common/interceptor/json-extract.interceptor';
 import { CreatePickPlaceDto } from './dto/pick-places.dto';
-import { ImageExtractInterceptor } from 'src/common/utils/interceptor/image-extract.interceptor';
+import { ImageExtractInterceptor } from 'src/common/interceptor/image-extract.interceptor';
 
 @Controller('pick-places')
 @UseGuards(JwtAuthGuard)

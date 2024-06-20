@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { SchemaUtilHelper } from 'src/common/utils/utils/schema-util.helper';
+import { SchemaUtilHelper } from 'src/common/helper/schema-util.helper';
 import { PickPlace, PickPlaceSchema } from './pick-places.schema';
-const schemaUtilHelper = new SchemaUtilHelper();
 
 @Injectable()
 export class PickPlacesConfigService {
+  constructor(private readonly schemaUtilHelper: SchemaUtilHelper) {}
   public schemaConfiguration() {
+    const schemaUtilHelper = this.schemaUtilHelper;
     PickPlaceSchema.virtual('placeImg').get(function (this: PickPlace) {
       if (this.imgName) return schemaUtilHelper.getFullImgAddress(this.imgName);
       else return null;

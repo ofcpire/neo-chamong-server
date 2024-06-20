@@ -15,7 +15,7 @@ import { BookmarkService } from 'src/camp/bookmark/bookmark.service';
 import { InterceptedRequest } from 'src/members/members';
 import { Response as Res } from 'express';
 import { BookmarkWishlistService } from 'src/camp/bookmark/bookmark-wishlist.service';
-import { WrapContentInterceptor } from 'src/common/utils/interceptor/wrap-content.interceptor';
+import { WrapContentInterceptor } from 'src/common/interceptor/wrap-content.interceptor';
 
 @Controller('bookmark')
 export class BookmarkController {

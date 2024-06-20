@@ -9,7 +9,7 @@ import {
   Request,
 } from '@nestjs/common';
 import { MainService } from 'src/main/main.service';
-import { WrapContentInterceptor } from 'src/common/utils/interceptor/wrap-content.interceptor';
+import { WrapContentInterceptor } from 'src/common/interceptor/wrap-content.interceptor';
 import { OptionalAuthGuard } from 'src/auth/optional-auth.interceptor';
 import { InterceptedRequest } from 'src/members/members';
 import { CampService } from '../camp/camp.service';

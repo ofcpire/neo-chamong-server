@@ -24,8 +24,8 @@ import {
   CreateArticleCommentDto,
 } from 'src/articles/dto/articles.dto';
 import { OptionalAuthGuard } from 'src/auth/optional-auth.interceptor';
-import { JsonExtractInterceptor } from 'src/common/utils/interceptor/json-extract.interceptor';
-import { ImageExtractInterceptor } from 'src/common/utils/interceptor/image-extract.interceptor';
+import { JsonExtractInterceptor } from 'src/common/interceptor/json-extract.interceptor';
+import { ImageExtractInterceptor } from 'src/common/interceptor/image-extract.interceptor';
 
 @Controller('articles')
 export class ArticlesController {

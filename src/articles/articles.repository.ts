@@ -194,15 +194,15 @@ export class ArticlesRepository {
 
   async unpublicSingleArticle(articleId: string) {
     return await this.articleModel.updateOne(
-      { articleId },
+      { id: articleId },
       {
         $set: { public: false },
       },
     );
   }
   async unpublicSingleComment(commentId: string) {
-    return await this.articleModel.updateOne(
-      { commentId },
+    return await this.articleCommentModel.updateOne(
+      { id: commentId },
       {
         $set: { public: false },
       },

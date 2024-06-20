@@ -211,16 +211,16 @@ export class ArticlesService {
   }
 
   async likeArticle(articleId: string, memberId: string) {
-    if (
-      this.articlesRepository.fetchSingleArticleLike({
-        articleId,
-        memberId,
-      })
-    )
-      throw new ConflictException();
     const session = await this.connection.startSession();
     session.startTransaction();
     try {
+      if (
+        await this.articlesRepository.fetchSingleArticleLike({
+          articleId,
+          memberId,
+        })
+      )
+        throw new ConflictException();
       await this.articlesRepository.createArticleLike(articleId, memberId);
       await this.articlesRepository.increaseOrDecreaseArticleLikeCnt(
         articleId,

@@ -87,3 +87,13 @@ export class ArticleLike extends Document {
 }
 
 export const ArticleLikeSchema = SchemaFactory.createForClass(ArticleLike);
+
+ArticleSchema.pre(['find', 'findOne'], function (next) {
+  this.where({ public: true });
+  next();
+});
+
+ArticleCommentSchema.pre(['find', 'findOne'], function (next) {
+  this.where({ public: true });
+  next();
+});

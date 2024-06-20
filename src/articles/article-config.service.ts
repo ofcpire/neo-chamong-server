@@ -11,15 +11,5 @@ export class ArticleConfigService {
       if (this.imgName) return schemaUtilHelper.getFullImgAddress(this.imgName);
       else return null;
     });
-
-    ArticleSchema.pre(['find', 'findOne'], function (next) {
-      this.where({ public: true });
-      next();
-    });
-
-    ArticleCommentSchema.pre(['find', 'findOne'], function (next) {
-      this.where({ public: true });
-      next();
-    });
   }
 }

@@ -4,6 +4,7 @@ import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.int
 import { ValidationPipe } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 import helmet from 'helmet';
+import { LoggingInterceptor } from './common/interceptor/logging-interceptor';
 
 async function bootstrap() {
   dotenv.config();
@@ -23,6 +24,7 @@ async function bootstrap() {
   );
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors(corsOption);
+  app.useGlobalInterceptors(new LoggingInterceptor());
   await app.listen(port);
 }
 bootstrap();

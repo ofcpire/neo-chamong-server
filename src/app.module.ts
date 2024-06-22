@@ -9,6 +9,7 @@ import { MypageModule } from './mypage/mypage.module';
 import { MainModule } from './main/main.module';
 import { ImageModule } from './image/image.module';
 import { HelperModule } from './common/helper/helper.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -16,6 +17,12 @@ import { HelperModule } from './common/helper/helper.module';
       envFilePath: ['.env', '.env.local'],
       isGlobal: true,
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60 * 1000,
+        limit: 100,
+      },
+    ]),
     MembersModule,
     CampModule,
     ArticlesModule,

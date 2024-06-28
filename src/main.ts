@@ -15,13 +15,7 @@ async function bootstrap() {
     origin: origin,
   };
   const app = await NestFactory.create(AppModule);
-  app.use(
-    helmet({
-      referrerPolicy: {
-        policy: 'strict-origin-when-cross-origin',
-      },
-    }),
-  );
+  app.use(helmet());
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors(corsOption);
   app.useGlobalInterceptors(new LoggingInterceptor());

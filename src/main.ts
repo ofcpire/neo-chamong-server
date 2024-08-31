@@ -13,6 +13,7 @@ async function bootstrap() {
   const corsOption: CorsOptions = {
     exposedHeaders: ['Authorization', 'Refresh'],
     origin: origin,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   };
   const app = await NestFactory.create(AppModule);
   app.use(helmet());

@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { ValidationPipe } from '@nestjs/common';
 import * as dotenv from 'dotenv';
-import helmet from 'helmet';
+// import helmet from 'helmet';
 import { LoggingInterceptor } from './common/interceptor/logging-interceptor';
 
 async function bootstrap() {
@@ -13,10 +13,9 @@ async function bootstrap() {
   const corsOption: CorsOptions = {
     exposedHeaders: ['Authorization', 'Refresh'],
     origin: origin,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   };
   const app = await NestFactory.create(AppModule);
-  app.use(helmet());
+  // app.use(helmet());
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors(corsOption);
   app.useGlobalInterceptors(new LoggingInterceptor());
